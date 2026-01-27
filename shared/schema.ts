@@ -248,7 +248,7 @@ export const siteSettings = pgTable('site_settings', {
   shadowColor: varchar('shadow_color', { length: 7 }).notNull().default('#000000'),
 
   // Site Information
-  bankName: varchar('bank_name', { length: 200 }).notNull().default('Sterling Capital Bank'),
+  bankName: varchar('bank_name', { length: 200 }).notNull().default('Online Banking'),
   tagline: text('tagline'),
   supportEmail: varchar('support_email', { length: 200 }),
   supportPhone: varchar('support_phone', { length: 50 }),

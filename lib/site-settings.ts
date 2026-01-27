@@ -90,7 +90,7 @@ const defaultSettings: SiteSettings = {
   shadowColor: '#000000',
 
   // Site Information
-  bankName: 'Sterling Capital Bank',
+  bankName: 'Online Banking',
   tagline: null,
   supportEmail: null,
   supportPhone: null,
@@ -150,4 +150,88 @@ export async function getBankName(): Promise<string> {
     console.error('Error fetching bank name:', error);
     return defaultSettings.bankName;
   }
+}
+
+/**
+ * Settings specific to HTML pages
+ * Used for dynamic content replacement in static HTML files
+ */
+export interface HtmlPageSettings {
+  bankName: string;
+  tagline: string | null;
+  supportEmail: string | null;
+  supportPhone: string | null;
+  address: string | null;
+  copyrightText: string | null;
+  facebookUrl: string | null;
+  twitterUrl: string | null;
+  instagramUrl: string | null;
+  linkedinUrl: string | null;
+  whatsappNumber: string | null;
+}
+
+/**
+ * Get settings optimized for HTML pages
+ * Returns only the fields needed for static page content replacement
+ */
+export async function getHtmlPageSettings(): Promise<HtmlPageSettings> {
+  try {
+    const settings = await db
+      .select({
+        bankName: siteSettings.bankName,
+        tagline: siteSettings.tagline,
+        supportEmail: siteSettings.supportEmail,
+        supportPhone: siteSettings.supportPhone,
+        address: siteSettings.address,
+        copyrightText: siteSettings.copyrightText,
+        facebookUrl: siteSettings.facebookUrl,
+        twitterUrl: siteSettings.twitterUrl,
+        instagramUrl: siteSettings.instagramUrl,
+        linkedinUrl: siteSettings.linkedinUrl,
+        whatsappNumber: siteSettings.whatsappNumber,
+      })
+      .from(siteSettings)
+      .limit(1);
+
+    if (settings.length > 0) {
+      return settings[0];
+    }
+
+    return {
+      bankName: defaultSettings.bankName,
+      tagline: defaultSettings.tagline,
+      supportEmail: defaultSettings.supportEmail,
+      supportPhone: defaultSettings.supportPhone,
+      address: defaultSettings.address,
+      copyrightText: defaultSettings.copyrightText,
+      facebookUrl: defaultSettings.facebookUrl,
+      twitterUrl: defaultSettings.twitterUrl,
+      instagramUrl: defaultSettings.instagramUrl,
+      linkedinUrl: defaultSettings.linkedinUrl,
+      whatsappNumber: defaultSettings.whatsappNumber,
+    };
+  } catch (error) {
+    console.error('Error fetching HTML page settings:', error);
+    return {
+      bankName: defaultSettings.bankName,
+      tagline: defaultSettings.tagline,
+      supportEmail: defaultSettings.supportEmail,
+      supportPhone: defaultSettings.supportPhone,
+      address: defaultSettings.address,
+      copyrightText: defaultSettings.copyrightText,
+      facebookUrl: defaultSettings.facebookUrl,
+      twitterUrl: defaultSettings.twitterUrl,
+      instagramUrl: defaultSettings.instagramUrl,
+      linkedinUrl: defaultSettings.linkedinUrl,
+      whatsappNumber: defaultSettings.whatsappNumber,
+    };
+  }
+}
+
+/**
+ * Generate copyright text with the current year
+ */
+export function generateCopyrightText(bankName: string): string {
+  const currentYear = new Date().getFullYear();
+  return `Copyright ${currentYear} by ${bankName}. All Rights Reserved.`;
 }
