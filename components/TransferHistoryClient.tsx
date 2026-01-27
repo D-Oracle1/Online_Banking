@@ -6,6 +6,7 @@ import { formatCurrency } from '@/lib/utils';
 import { FileDown, Printer, X, Eye, Download } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 interface Transaction {
   id: string;
@@ -29,6 +30,7 @@ export default function TransferHistoryClient({ transfers, accountNumber, userNa
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [showReceipt, setShowReceipt] = useState(false);
   const receiptRef = useRef<HTMLDivElement>(null);
+  const { settings } = useSiteSettings();
 
   const handleViewReceipt = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
@@ -176,7 +178,7 @@ export default function TransferHistoryClient({ transfers, accountNumber, userNa
             <div ref={receiptRef} className="p-4 md:p-5 bg-white print-receipt">
               {/* Bank Header */}
               <div className="text-center mb-4 pb-3 border-b-2 border-gray-200">
-                <h3 className="text-xl md:text-2xl font-bold text-blue-900 mb-1">Sterling Capital Bank</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-blue-900 mb-1">{settings.bankName}</h3>
                 <p className="text-xs text-gray-600">Transaction Receipt</p>
               </div>
 
@@ -258,7 +260,7 @@ export default function TransferHistoryClient({ transfers, accountNumber, userNa
               {/* Footer Note */}
               <div className="bg-gray-50 p-2 rounded text-center">
                 <p className="text-xs text-gray-600">
-                  Electronically generated receipt. © {new Date().getFullYear()} Sterling Capital Bank.
+                  Electronically generated receipt. © {new Date().getFullYear()} {settings.bankName}.
                 </p>
               </div>
             </div>

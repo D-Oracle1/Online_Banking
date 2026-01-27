@@ -4,10 +4,12 @@ import { users } from '@/shared/schema';
 import { eq } from 'drizzle-orm';
 import crypto from 'crypto';
 import { sendEmail } from '@/lib/email';
+import { getBankName } from '@/lib/site-settings';
 
 export async function POST(request: NextRequest) {
   try {
     const { email } = await request.json();
+    const bankName = await getBankName();
 
     // Validate email
     if (!email) {
@@ -63,11 +65,11 @@ export async function POST(request: NextRequest) {
       try {
         await sendEmail({
           to: user.email,
-          subject: 'Reset Your Sterling Capital Bank Password',
+          subject: 'Reset Your ${bankName} Password',
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
               <div style="background-color: #1e3a8a; padding: 20px; text-align: center;">
-                <h1 style="color: white; margin: 0;">Sterling Capital Bank</h1>
+                <h1 style="color: white; margin: 0;">${bankName}</h1>
               </div>
               <div style="padding: 30px; background-color: #f9fafb;">
                 <h2 style="color: #1e3a8a; margin-bottom: 20px;">Password Reset Request</h2>
@@ -75,7 +77,7 @@ export async function POST(request: NextRequest) {
                   Dear ${user.fullName},
                 </p>
                 <p style="color: #374151; font-size: 16px; line-height: 1.6;">
-                  We received a request to reset your password for your Sterling Capital Bank account.
+                  We received a request to reset your password for your ${bankName} account.
                 </p>
                 <p style="color: #374151; font-size: 16px; line-height: 1.6;">
                   Click the button below to reset your password. This link will expire in 1 hour.
@@ -100,7 +102,7 @@ export async function POST(request: NextRequest) {
               </div>
               <div style="background-color: #111827; padding: 20px; text-align: center;">
                 <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                  © ${new Date().getFullYear()} Sterling Capital Bank. All rights reserved.
+                  © ${new Date().getFullYear()} ${bankName}. All rights reserved.
                 </p>
                 <p style="color: #9ca3af; font-size: 12px; margin: 5px 0 0 0;">
                   This is an automated message, please do not reply.

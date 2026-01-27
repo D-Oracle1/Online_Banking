@@ -2,15 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
 import { KeyRound, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
 import SupportChatbot from '@/components/SupportChatbot';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 export default function Reset2FAPage() {
+  const { settings } = useSiteSettings();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [resetCode, setResetCode] = useState('');
@@ -88,7 +87,7 @@ export default function Reset2FAPage() {
             <div className="flex justify-center mb-4">
               <Image
                 src="/logo_1760007385.png"
-                alt="Sterling Capital Bank Logo"
+                alt="{settings.bankName} Logo"
                 width={200}
                 height={80}
                 priority
@@ -185,7 +184,7 @@ export default function Reset2FAPage() {
         </div>
 
         <p className="text-white text-center mt-6 text-sm">
-          © 2025 Sterling Capital Bank. All rights reserved.
+          © 2025 {settings.bankName}. All rights reserved.
         </p>
       </div>
       <SupportChatbot />

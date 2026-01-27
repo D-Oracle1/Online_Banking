@@ -1,9 +1,11 @@
 import Link from 'next/link';
+import { getBankName } from '@/lib/site-settings';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const bankName = await getBankName();
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -22,7 +24,7 @@ export default function TermsPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Introduction</h2>
               <p className="text-gray-700 mb-4">
-                Welcome to Sterling Capital Bank. These Terms and Conditions govern your use of our banking services,
+                Welcome to {bankName}. These Terms and Conditions govern your use of our banking services,
                 website, and mobile applications. By accessing or using our services, you agree to be bound by these terms.
               </p>
             </section>
@@ -31,7 +33,7 @@ export default function TermsPage() {
               <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Account Services</h2>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">2.1 Account Opening</h3>
               <p className="text-gray-700 mb-4">
-                To open an account with Sterling Capital Bank, you must:
+                To open an account with {bankName}, you must:
               </p>
               <ul className="list-disc pl-6 mb-4 text-gray-700">
                 <li>Be at least 18 years of age</li>
@@ -71,7 +73,7 @@ export default function TermsPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">4. Fees and Charges</h2>
               <p className="text-gray-700 mb-4">
-                Sterling Capital Bank may charge fees for certain services, including but not limited to:
+                {bankName} may charge fees for certain services, including but not limited to:
               </p>
               <ul className="list-disc pl-6 mb-4 text-gray-700">
                 <li>Monthly maintenance fees</li>
@@ -115,7 +117,7 @@ export default function TermsPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Liability and Disclaimers</h2>
               <p className="text-gray-700 mb-4">
-                Sterling Capital Bank is not liable for:
+                {bankName} is not liable for:
               </p>
               <ul className="list-disc pl-6 mb-4 text-gray-700">
                 <li>Losses resulting from unauthorized access due to user negligence</li>
@@ -141,7 +143,7 @@ export default function TermsPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Modifications</h2>
               <p className="text-gray-700 mb-4">
-                Sterling Capital Bank reserves the right to modify these Terms and Conditions at any time.
+                {bankName} reserves the right to modify these Terms and Conditions at any time.
                 Changes will be effective upon posting to our website. Continued use of our services constitutes
                 acceptance of modified terms.
               </p>
@@ -163,14 +165,14 @@ export default function TermsPage() {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-gray-700"><strong>Email:</strong> legal@sterlingcapitalbank.com</p>
                 <p className="text-gray-700"><strong>Phone:</strong> +1 (800) 123-4567</p>
-                <p className="text-gray-700"><strong>Address:</strong> Sterling Capital Bank HQ, New York, USA</p>
+                <p className="text-gray-700"><strong>Address:</strong> {bankName} HQ, New York, USA</p>
               </div>
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">12. FDIC Insurance</h2>
               <p className="text-gray-700 mb-4">
-                Your deposits with Sterling Capital Bank are insured by the Federal Deposit Insurance Corporation
+                Your deposits with {bankName} are insured by the Federal Deposit Insurance Corporation
                 (FDIC) up to the maximum amount permitted by law.
               </p>
             </section>
@@ -178,7 +180,7 @@ export default function TermsPage() {
 
           <div className="mt-12 pt-8 border-t border-gray-200">
             <p className="text-sm text-gray-600">
-              By using Sterling Capital Bank services, you acknowledge that you have read, understood, and agree
+              By using {bankName} services, you acknowledge that you have read, understood, and agree
               to be bound by these Terms and Conditions.
             </p>
           </div>

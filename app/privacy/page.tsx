@@ -1,9 +1,11 @@
 import Link from 'next/link';
+import { getBankName } from '@/lib/site-settings';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const bankName = await getBankName();
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -24,7 +26,7 @@ export default function PrivacyPage() {
 
               <h3 className="text-xl font-semibold text-gray-900 mb-3">1. Information We Collect</h3>
               <p className="text-gray-700 mb-4">
-                Sterling Capital Bank collects information necessary to provide you with banking services, including:
+                {bankName} collects information necessary to provide you with banking services, including:
               </p>
               <ul className="list-disc pl-6 mb-4 text-gray-700">
                 <li><strong>Personal Information:</strong> Name, email address, date of birth, social security number</li>
@@ -113,24 +115,24 @@ export default function PrivacyPage() {
 
               <h3 className="text-xl font-semibold text-gray-900 mb-3">1. Ownership</h3>
               <p className="text-gray-700 mb-4">
-                © 2025 Sterling Capital Bank. All rights reserved.
+                © 2025 {bankName}. All rights reserved.
               </p>
               <p className="text-gray-700 mb-4">
                 All content on this website, including but not limited to text, graphics, logos, images, audio clips,
-                digital downloads, data compilations, and software, is the property of Sterling Capital Bank or its
+                digital downloads, data compilations, and software, is the property of {bankName} or its
                 content suppliers and is protected by United States and international copyright laws.
               </p>
 
               <h3 className="text-xl font-semibold text-gray-900 mb-3">2. Trademarks</h3>
               <p className="text-gray-700 mb-4">
-                Sterling Capital Bank, the Sterling Capital Bank logo, and all related names, logos, product and
-                service names, designs, and slogans are trademarks of Sterling Capital Bank. You may not use such
-                marks without prior written permission from Sterling Capital Bank.
+                {bankName}, the {bankName} logo, and all related names, logos, product and
+                service names, designs, and slogans are trademarks of {bankName}. You may not use such
+                marks without prior written permission from {bankName}.
               </p>
 
               <h3 className="text-xl font-semibold text-gray-900 mb-3">3. Limited License</h3>
               <p className="text-gray-700 mb-4">
-                Sterling Capital Bank grants you a limited license to:
+                {bankName} grants you a limited license to:
               </p>
               <ul className="list-disc pl-6 mb-4 text-gray-700">
                 <li>Access and use our website for personal, non-commercial purposes</li>
@@ -168,7 +170,7 @@ export default function PrivacyPage() {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-gray-700"><strong>Privacy Officer:</strong> privacy@sterlingcapitalbank.com</p>
                 <p className="text-gray-700"><strong>Phone:</strong> +1 (800) 123-4567</p>
-                <p className="text-gray-700"><strong>Mail:</strong> Sterling Capital Bank, Privacy Department, New York, USA</p>
+                <p className="text-gray-700"><strong>Mail:</strong> {bankName}, Privacy Department, New York, USA</p>
               </div>
             </section>
 
@@ -184,7 +186,7 @@ export default function PrivacyPage() {
 
           <div className="mt-12 pt-8 border-t border-gray-200 bg-blue-50 p-6 rounded-lg">
             <p className="text-sm text-gray-700">
-              <strong>FDIC Insured:</strong> Your deposits with Sterling Capital Bank are insured by the Federal
+              <strong>FDIC Insured:</strong> Your deposits with {bankName} are insured by the Federal
               Deposit Insurance Corporation up to $250,000 per depositor, per account ownership category.
             </p>
           </div>

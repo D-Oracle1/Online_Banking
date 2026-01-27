@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getBankName } from '@/lib/site-settings';
 
-// Banking knowledge base for the chatbot
-const bankingKnowledge = {
+// Banking knowledge base for the chatbot - using placeholder for bank name
+function getBankingKnowledge(bankName: string) {
+  return {
   deposit: {
     keywords: ['deposit', 'top up', 'add money', 'fund', 'transfer money in'],
-    response: `To make a deposit to your Sterling Capital Bank account:
+    response: `To make a deposit to your ${bankName} account:
 
 1. Navigate to the "Deposit (Top Up)" section from your dashboard
 2. Enter the amount you wish to deposit (minimum $3,000 for account activation)
@@ -16,7 +18,7 @@ For new accounts, please note that a minimum deposit of $3,000 is required to ac
 
   aml: {
     keywords: ['aml', 'anti money laundering', 'money laundering', 'compliance', 'regulations', 'kyc'],
-    response: `Sterling Capital Bank's Anti-Money Laundering (AML) Policy:
+    response: `${bankName}'s Anti-Money Laundering (AML) Policy:
 
 • All transactions are monitored for suspicious activity
 • We may request documentation to verify the source of funds
@@ -30,7 +32,7 @@ Our AML policies protect you and ensure the integrity of the financial system.`
 
   activation: {
     keywords: ['activate', 'activation', 'activate account', 'new account', 'account setup'],
-    response: `To activate your Sterling Capital Bank account:
+    response: `To activate your ${bankName} account:
 
 1. Make a minimum deposit of $3,000 to your account
 2. Ensure your KYC documents are complete and verified
@@ -47,7 +49,7 @@ Once these steps are completed, your account will be fully activated and you'll 
 
   minimum: {
     keywords: ['minimum', 'minimum deposit', 'how much', 'required amount', 'initial deposit'],
-    response: `The minimum deposit requirement for Sterling Capital Bank is $3,000.00.
+    response: `The minimum deposit requirement for ${bankName} is $3,000.00.
 
 This one-time deposit is required to:
 • Activate your account
@@ -67,12 +69,12 @@ After activation, there is no minimum balance requirement for your account.`
 4. Enter your transaction PIN for security
 5. Confirm the transfer details
 
-Transfers are processed instantly within Sterling Capital Bank. External transfers may take 1-3 business days.`
+Transfers are processed instantly within ${bankName}. External transfers may take 1-3 business days.`
   },
 
   loan: {
     keywords: ['loan', 'borrow', 'credit', 'lending'],
-    response: `Sterling Capital Bank offers personal and business loans:
+    response: `${bankName} offers personal and business loans:
 
 • Competitive interest rates
 • Flexible repayment terms
@@ -89,7 +91,7 @@ Our team will review your application within 24-48 hours and contact you with a 
 
   card: {
     keywords: ['card', 'debit card', 'atm', 'atm card'],
-    response: `Your Sterling Capital Bank debit card provides:
+    response: `Your ${bankName} debit card provides:
 
 • Worldwide acceptance
 • 24/7 ATM access
@@ -114,7 +116,7 @@ Keep your PIN confidential and never share it with anyone, including bank staff.
 
   support: {
     keywords: ['help', 'support', 'contact', 'assistance', 'customer service'],
-    response: `Sterling Capital Bank provides 24/7 customer support:
+    response: `${bankName} provides 24/7 customer support:
 
 • Live Chat: Available right here through this chat
 • Email: support@sterlingcapitalbank.com
@@ -137,7 +139,7 @@ Your balance is updated in real-time with every transaction.`
 
   savings: {
     keywords: ['savings', 'fixed savings', 'interest', 'save money'],
-    response: `Sterling Capital Bank offers Fixed Savings accounts with competitive interest rates:
+    response: `${bankName} offers Fixed Savings accounts with competitive interest rates:
 
 • Lock in higher interest rates for fixed terms
 • Terms ranging from 3 months to 5 years
@@ -146,10 +148,12 @@ Your balance is updated in real-time with every transaction.`
 
 Visit the "Fixed Savings" section to open a fixed savings account and start earning more on your deposits!`
   }
-};
+  };
+}
 
-function findBestMatch(userMessage: string): string {
+function findBestMatch(userMessage: string, bankName: string): string {
   const lowercaseMessage = userMessage.toLowerCase();
+  const bankingKnowledge = getBankingKnowledge(bankName);
 
   // Check each knowledge category
   for (const [key, data] of Object.entries(bankingKnowledge)) {
@@ -161,7 +165,7 @@ function findBestMatch(userMessage: string): string {
   }
 
   // Default response if no match found
-  return `Thank you for reaching out to Sterling Capital Bank.
+  return `Thank you for reaching out to ${bankName}.
 
 I'm here to help with questions about:
 • Account deposits and activation
@@ -187,10 +191,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get bank name from settings
+    const bankName = await getBankName();
+
     // Simulate a small delay to make it feel more natural
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    const response = findBestMatch(message);
+    const response = findBestMatch(message, bankName);
 
     return NextResponse.json({ response });
   } catch (error) {

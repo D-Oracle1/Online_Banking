@@ -6,6 +6,7 @@ import { formatCurrency } from '@/lib/utils';
 import { FileDown, Printer, X, Download } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 interface Transaction {
   id: string;
@@ -33,6 +34,7 @@ export default function TransactionReceiptModal({
   onClose,
 }: TransactionReceiptModalProps) {
   const receiptRef = useRef<HTMLDivElement>(null);
+  const { settings } = useSiteSettings();
 
   const handlePrint = () => {
     window.print();
@@ -118,7 +120,7 @@ export default function TransactionReceiptModal({
         <div ref={receiptRef} className="p-4 md:p-5 bg-white print-receipt">
           {/* Bank Header */}
           <div className="text-center mb-4 pb-3 border-b-2 border-gray-200">
-            <h3 className="text-xl md:text-2xl font-bold text-blue-900 mb-1">Sterling Capital Bank</h3>
+            <h3 className="text-xl md:text-2xl font-bold text-blue-900 mb-1">{settings.bankName}</h3>
             <p className="text-xs text-gray-600">Transaction Receipt</p>
             <p className="text-xs text-gray-500 mt-0.5">
               ID: {transaction.id.slice(0, 8).toUpperCase()}...{transaction.id.slice(-4).toLowerCase()}
@@ -198,7 +200,7 @@ export default function TransactionReceiptModal({
           {/* Footer Note */}
           <div className="bg-gray-50 p-2 rounded text-center">
             <p className="text-xs text-gray-600">
-              Computer-generated receipt. © {new Date().getFullYear()} Sterling Capital Bank.
+              Computer-generated receipt. © {new Date().getFullYear()} {settings.bankName}.
             </p>
           </div>
         </div>

@@ -1,14 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 export default function ForgotPasswordPage() {
+  const { settings } = useSiteSettings();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -53,7 +52,7 @@ export default function ForgotPasswordPage() {
         <div className="flex justify-center mb-6">
           <Image
             src="/logo_1760007385.png"
-            alt="Sterling Capital Bank Logo"
+            alt={`${settings.bankName} Logo`}
             width={180}
             height={72}
             priority

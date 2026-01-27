@@ -11,13 +11,16 @@ interface EmailOptions {
 
 export async function sendEmail({ to, subject, html, text }: EmailOptions) {
   try {
+    // Get bank name from settings for email sender name
+    const bankName = await getBankName();
+
     // Try Resend first if API key is available
     if (process.env.RESEND_API_KEY) {
       console.log('Sending email via Resend...');
       const resend = new Resend(process.env.RESEND_API_KEY);
 
       const fromEmail = process.env.RESEND_FROM_EMAIL || process.env.SMTP_FROM_EMAIL || 'onboarding@resend.dev';
-      const fromName = process.env.SMTP_FROM_NAME || 'Sterling Capital Bank';
+      const fromName = process.env.SMTP_FROM_NAME || bankName;
 
       const { data, error } = await resend.emails.send({
         from: `${fromName} <${fromEmail}>`,
@@ -50,7 +53,7 @@ export async function sendEmail({ to, subject, html, text }: EmailOptions) {
 
     // Send email
     const info = await transporter.sendMail({
-      from: `"${process.env.SMTP_FROM_NAME || 'Sterling Capital Bank'}" <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
+      from: `"${process.env.SMTP_FROM_NAME || bankName}" <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
       to,
       subject,
       text,

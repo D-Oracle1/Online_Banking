@@ -5,8 +5,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Lock, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 export default function ResetPasswordClient() {
+  const { settings } = useSiteSettings();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams?.get('token');
@@ -134,7 +136,7 @@ export default function ResetPasswordClient() {
         <div className="flex justify-center mb-6">
           <Image
             src="/logo_1760007385.png"
-            alt="Sterling Capital Bank Logo"
+            alt="{settings.bankName} Logo"
             width={180}
             height={72}
             priority

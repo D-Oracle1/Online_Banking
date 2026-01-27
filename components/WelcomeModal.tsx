@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, AlertCircle, Shield, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 interface WelcomeModalProps {
   userName: string;
@@ -13,6 +14,7 @@ interface WelcomeModalProps {
 export default function WelcomeModal({ userName, onClose }: WelcomeModalProps) {
   const router = useRouter();
   const [agreed, setAgreed] = useState(false);
+  const { settings } = useSiteSettings();
 
   const handleContinue = () => {
     onClose();
@@ -39,14 +41,14 @@ export default function WelcomeModal({ userName, onClose }: WelcomeModalProps) {
           <div className="flex items-center justify-center mb-4">
             <Image
               src="/logo_1760007385.png"
-              alt="Sterling Capital Bank"
+              alt={settings.bankName}
               width={150}
               height={60}
               className="object-contain brightness-0 invert"
             />
           </div>
           <h2 className="text-2xl font-bold text-white text-center">
-            Welcome to Sterling Capital Bank!
+            Welcome to {settings.bankName}!
           </h2>
           <p className="text-blue-100 text-center mt-2">
             Hello {userName}, we're excited to have you on board.
@@ -82,7 +84,7 @@ export default function WelcomeModal({ userName, onClose }: WelcomeModalProps) {
                 </h3>
                 <div className="text-blue-800 text-sm space-y-2">
                   <p>
-                    Sterling Capital Bank is committed to preventing money laundering and terrorist
+                    {settings.bankName} is committed to preventing money laundering and terrorist
                     financing. As part of our compliance program:
                   </p>
                   <ul className="list-disc list-inside space-y-1 ml-2">

@@ -2,11 +2,10 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 export default function CreateAdminPage() {
+  const { settings } = useSiteSettings();
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [twoFactorToken, setTwoFactorToken] = useState('');
@@ -82,7 +81,7 @@ export default function CreateAdminPage() {
           <div className="flex justify-center mb-4">
             <Image
               src="/logo_1760007385.png"
-              alt="Sterling Capital Bank Logo"
+              alt="{settings.bankName} Logo"
               width={200}
               height={80}
               priority

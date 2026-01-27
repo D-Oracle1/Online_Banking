@@ -2,13 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
-interface LoginFormProps {
-  bankName?: string;
-}
-
-export default function LoginForm({ bankName = 'Sterling Capital Bank' }: LoginFormProps) {
+export default function LoginForm() {
   const router = useRouter();
+  const { settings } = useSiteSettings();
   const [isSignup, setIsSignup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -392,7 +390,7 @@ export default function LoginForm({ bankName = 'Sterling Capital Bank' }: LoginF
       </button>
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
-        <p className="text-blue-900 font-medium mb-1">Welcome to {bankName}</p>
+        <p className="text-blue-900 font-medium mb-1">Welcome to {settings.bankName}</p>
         <p className="text-blue-700">
           {isSignup
             ? 'Create an account to access secure online banking services.'

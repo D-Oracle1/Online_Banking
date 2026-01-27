@@ -4,12 +4,14 @@ import { db } from '@/server/db';
 import { users } from '@/shared/schema';
 import { inArray } from 'drizzle-orm';
 import { sendEmail } from '@/lib/email';
+import { getBankName } from '@/lib/site-settings';
 
 export async function POST(request: NextRequest) {
   try {
     await requireAdmin();
 
     const { userIds, subject, message } = await request.json();
+    const bankName = await getBankName();
 
     // Validate input
     if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
@@ -62,7 +64,7 @@ export async function POST(request: NextRequest) {
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
               <div style="background-color: #1e3a8a; padding: 20px; text-align: center;">
-                <h1 style="color: white; margin: 0;">Sterling Capital Bank</h1>
+                <h1 style="color: white; margin: 0;">${bankName}</h1>
               </div>
               <div style="padding: 30px; background-color: #f9fafb;">
                 <p style="color: #374151; font-size: 16px; margin-bottom: 20px;">Dear ${user.fullName},</p>
@@ -72,7 +74,7 @@ export async function POST(request: NextRequest) {
               </div>
               <div style="background-color: #111827; padding: 20px; text-align: center;">
                 <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                  © ${new Date().getFullYear()} Sterling Capital Bank. All rights reserved.
+                  © ${new Date().getFullYear()} ${bankName}. All rights reserved.
                 </p>
               </div>
             </div>

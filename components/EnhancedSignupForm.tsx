@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Upload, User, Mail, Lock, Phone, MapPin, Briefcase, Calendar, DollarSign, CheckCircle2 } from 'lucide-react';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 interface SignupFormData {
   // Basic Info
@@ -34,6 +35,7 @@ interface SignupFormData {
 
 export default function EnhancedSignupForm() {
   const router = useRouter();
+  const { settings } = useSiteSettings();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -781,7 +783,7 @@ export default function EnhancedSignupForm() {
               <CheckCircle2 className="w-10 h-10 sm:w-12 sm:h-12 text-green-600" />
             </div>
 
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Welcome to Sterling Capital Bank!</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Welcome to {settings.bankName}!</h2>
             <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
               Your account has been successfully created and is now pending admin verification.
             </p>

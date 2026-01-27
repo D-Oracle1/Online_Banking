@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot, User, Paperclip, XCircle } from 'lucide-react';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 interface Message {
   id: string;
@@ -12,6 +13,7 @@ interface Message {
 }
 
 export default function SupportChatbot() {
+  const { settings } = useSiteSettings();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -354,7 +356,7 @@ export default function SupportChatbot() {
     // Add welcome message
     const welcomeMessage: Message = {
       id: '1',
-      text: `Hello ${name}! Welcome to Sterling Capital Bank Support. Our team is ready to assist you. How can we help you today?`,
+      text: `Hello ${name}! Welcome to ${settings.bankName} Support. Our team is ready to assist you. How can we help you today?`,
       sender: 'bot',
       timestamp: new Date(),
     };
@@ -597,7 +599,7 @@ export default function SupportChatbot() {
                   <User className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3 text-center">
-                  Welcome to Sterling Capital Bank Support
+                  Welcome to {settings.bankName} Support
                 </h3>
                 <p className="text-sm text-gray-600 mb-6 text-center leading-relaxed">
                   Please tell us your name to continue chatting with our support team.
