@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
       icon: settings.faviconUrl || '/favicon.ico',
       apple: '/apple-touch-icon.png',
     },
-    manifest: '/manifest.json',
+    manifest: '/api/manifest',
     appleWebApp: {
       capable: true,
       statusBarStyle: 'black-translucent',

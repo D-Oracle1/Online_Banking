@@ -80,15 +80,15 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net https://vercel.live",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com",
               "img-src 'self' data: blob: https: http:",
               "font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com",
-              "connect-src 'self' https://res.cloudinary.com https://fonts.googleapis.com https://fonts.gstatic.com https://*.firebaseio.com https://*.googleapis.com wss://*.firebaseio.com",
+              "connect-src 'self' https://*.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://*.firebaseio.com https://*.googleapis.com wss://*.firebaseio.com https://vercel.live wss://vercel.live",
               "frame-ancestors 'self'",
               "base-uri 'self'",
               "form-action 'self'",
-              "media-src 'self' https://res.cloudinary.com",
+              "media-src 'self' https://*.supabase.co",
               "upgrade-insecure-requests"
             ].join('; ')
           }

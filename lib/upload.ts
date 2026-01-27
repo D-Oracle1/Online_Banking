@@ -1,11 +1,12 @@
-import { v2 as cloudinary } from 'cloudinary';
+import { createClient } from '@supabase/supabase-js';
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Initialize Supabase client
+const supabaseUrl = process.env.SUPABASE_URL || '';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const BUCKET_NAME = 'bank-assets';
 
 export interface UploadResult {
   success: boolean;
@@ -16,8 +17,6 @@ export interface UploadResult {
 export interface FileValidationOptions {
   maxSizeInMB?: number;
   allowedTypes?: string[];
-  maxWidth?: number;
-  maxHeight?: number;
 }
 
 /**
@@ -53,11 +52,36 @@ export function validateFile(
 }
 
 /**
- * Uploads an image to Cloudinary
+ * Ensures the storage bucket exists
+ */
+async function ensureBucketExists(): Promise<boolean> {
+  try {
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const bucketExists = buckets?.some(b => b.name === BUCKET_NAME);
+
+    if (!bucketExists) {
+      const { error } = await supabase.storage.createBucket(BUCKET_NAME, {
+        public: true,
+        fileSizeLimit: 5 * 1024 * 1024, // 5MB
+      });
+      if (error && !error.message.includes('already exists')) {
+        console.error('Error creating bucket:', error);
+        return false;
+      }
+    }
+    return true;
+  } catch (error) {
+    console.error('Error ensuring bucket exists:', error);
+    return false;
+  }
+}
+
+/**
+ * Uploads an image to Supabase Storage
  */
 export async function uploadImage(
   file: File,
-  folder: string = 'nextbanker'
+  folder: string = 'general'
 ): Promise<UploadResult> {
   try {
     // Validate file
@@ -66,24 +90,40 @@ export async function uploadImage(
       return { success: false, error: validation.error };
     }
 
-    // Convert File to base64
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const base64String = buffer.toString('base64');
-    const dataUri = `data:${file.type};base64,${base64String}`;
+    // Ensure bucket exists
+    await ensureBucketExists();
 
-    // Upload to Cloudinary
-    const result = await cloudinary.uploader.upload(dataUri, {
-      folder: folder,
-      resource_type: 'image',
-      transformation: [
-        { quality: 'auto', fetch_format: 'auto' },
-      ],
-    });
+    // Generate unique filename
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 8);
+    const extension = file.name.split('.').pop() || 'png';
+    const filename = `${folder}/${timestamp}-${randomString}.${extension}`;
+
+    // Convert File to ArrayBuffer
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = new Uint8Array(arrayBuffer);
+
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(filename, buffer, {
+        contentType: file.type,
+        upsert: true,
+      });
+
+    if (error) {
+      console.error('Supabase upload error:', error);
+      return { success: false, error: error.message };
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(data.path);
 
     return {
       success: true,
-      url: result.secure_url,
+      url: urlData.publicUrl,
     };
   } catch (error) {
     console.error('Error uploading image:', error);
@@ -95,194 +135,91 @@ export async function uploadImage(
 }
 
 /**
- * Uploads a logo image with specific dimensions
+ * Uploads a logo image
  */
 export async function uploadLogo(file: File): Promise<UploadResult> {
-  try {
-    // Validate file
-    const validation = validateFile(file, {
-      maxSizeInMB: 2,
-      allowedTypes: ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'],
-    });
+  const validation = validateFile(file, {
+    maxSizeInMB: 2,
+    allowedTypes: ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'],
+  });
 
-    if (!validation.valid) {
-      return { success: false, error: validation.error };
-    }
-
-    // Convert File to base64
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const base64String = buffer.toString('base64');
-    const dataUri = `data:${file.type};base64,${base64String}`;
-
-    // Upload to Cloudinary with logo-specific transformations
-    const result = await cloudinary.uploader.upload(dataUri, {
-      folder: 'nextbanker/logos',
-      resource_type: 'image',
-      transformation: [
-        { width: 500, height: 500, crop: 'limit' },
-        { quality: 'auto', fetch_format: 'auto' },
-      ],
-    });
-
-    return {
-      success: true,
-      url: result.secure_url,
-    };
-  } catch (error) {
-    console.error('Error uploading logo:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to upload logo',
-    };
+  if (!validation.valid) {
+    return { success: false, error: validation.error };
   }
+
+  return uploadImage(file, 'logos');
 }
 
 /**
- * Uploads a favicon with specific dimensions
+ * Uploads a favicon
  */
 export async function uploadFavicon(file: File): Promise<UploadResult> {
-  try {
-    // Validate file
-    const validation = validateFile(file, {
-      maxSizeInMB: 1,
-      allowedTypes: ['image/png', 'image/x-icon', 'image/vnd.microsoft.icon'],
-    });
+  const validation = validateFile(file, {
+    maxSizeInMB: 1,
+    allowedTypes: ['image/png', 'image/x-icon', 'image/vnd.microsoft.icon', 'image/ico'],
+  });
 
-    if (!validation.valid) {
-      return { success: false, error: validation.error };
-    }
-
-    // Convert File to base64
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const base64String = buffer.toString('base64');
-    const dataUri = `data:${file.type};base64,${base64String}`;
-
-    // Upload to Cloudinary with favicon-specific transformations
-    const result = await cloudinary.uploader.upload(dataUri, {
-      folder: 'nextbanker/favicons',
-      resource_type: 'image',
-      transformation: [
-        { width: 64, height: 64, crop: 'fill' },
-        { quality: 'auto', fetch_format: 'auto' },
-      ],
-    });
-
-    return {
-      success: true,
-      url: result.secure_url,
-    };
-  } catch (error) {
-    console.error('Error uploading favicon:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to upload favicon',
-    };
+  if (!validation.valid) {
+    return { success: false, error: validation.error };
   }
+
+  return uploadImage(file, 'favicons');
 }
 
 /**
- * Uploads a splash screen logo with specific dimensions
+ * Uploads a splash screen logo
  */
 export async function uploadSplashLogo(file: File): Promise<UploadResult> {
-  try {
-    // Validate file
-    const validation = validateFile(file, {
-      maxSizeInMB: 2,
-      allowedTypes: ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'],
-    });
+  const validation = validateFile(file, {
+    maxSizeInMB: 2,
+    allowedTypes: ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'],
+  });
 
-    if (!validation.valid) {
-      return { success: false, error: validation.error };
-    }
-
-    // Convert File to base64
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const base64String = buffer.toString('base64');
-    const dataUri = `data:${file.type};base64,${base64String}`;
-
-    // Upload to Cloudinary with splash logo transformations
-    const result = await cloudinary.uploader.upload(dataUri, {
-      folder: 'nextbanker/splash',
-      resource_type: 'image',
-      transformation: [
-        { width: 600, height: 300, crop: 'limit' },
-        { quality: 'auto', fetch_format: 'auto' },
-      ],
-    });
-
-    return {
-      success: true,
-      url: result.secure_url,
-    };
-  } catch (error) {
-    console.error('Error uploading splash logo:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to upload splash logo',
-    };
+  if (!validation.valid) {
+    return { success: false, error: validation.error };
   }
+
+  return uploadImage(file, 'splash');
 }
 
 /**
- * Uploads an app icon (PWA) with specific dimensions
+ * Uploads an app icon (PWA)
  */
 export async function uploadAppIcon(file: File): Promise<UploadResult> {
-  try {
-    // Validate file
-    const validation = validateFile(file, {
-      maxSizeInMB: 2,
-      allowedTypes: ['image/png', 'image/jpeg', 'image/webp'],
-    });
+  const validation = validateFile(file, {
+    maxSizeInMB: 2,
+    allowedTypes: ['image/png', 'image/jpeg', 'image/webp'],
+  });
 
-    if (!validation.valid) {
-      return { success: false, error: validation.error };
-    }
-
-    // Convert File to base64
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const base64String = buffer.toString('base64');
-    const dataUri = `data:${file.type};base64,${base64String}`;
-
-    // Upload to Cloudinary with app icon transformations
-    const result = await cloudinary.uploader.upload(dataUri, {
-      folder: 'nextbanker/icons',
-      resource_type: 'image',
-      transformation: [
-        { width: 512, height: 512, crop: 'fill' },
-        { quality: 'auto', fetch_format: 'auto' },
-      ],
-    });
-
-    return {
-      success: true,
-      url: result.secure_url,
-    };
-  } catch (error) {
-    console.error('Error uploading app icon:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to upload app icon',
-    };
+  if (!validation.valid) {
+    return { success: false, error: validation.error };
   }
+
+  return uploadImage(file, 'icons');
 }
 
 /**
- * Deletes an image from Cloudinary using its URL
+ * Deletes an image from Supabase Storage
  */
 export async function deleteImage(imageUrl: string): Promise<boolean> {
   try {
-    // Extract public_id from Cloudinary URL
-    const urlParts = imageUrl.split('/');
-    const filename = urlParts[urlParts.length - 1];
-    const publicId = filename.split('.')[0];
-    const folder = urlParts.slice(-3, -1).join('/');
-    const fullPublicId = `${folder}/${publicId}`;
+    // Extract path from URL
+    const url = new URL(imageUrl);
+    const pathParts = url.pathname.split(`/storage/v1/object/public/${BUCKET_NAME}/`);
+    if (pathParts.length < 2) {
+      return false;
+    }
+    const filePath = pathParts[1];
 
-    await cloudinary.uploader.destroy(fullPublicId);
+    const { error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .remove([filePath]);
+
+    if (error) {
+      console.error('Error deleting image:', error);
+      return false;
+    }
+
     return true;
   } catch (error) {
     console.error('Error deleting image:', error);
