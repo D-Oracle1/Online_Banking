@@ -1,0 +1,23 @@
+ALTER TABLE "accounts" ADD COLUMN "deleted_at" timestamp;--> statement-breakpoint
+ALTER TABLE "accounts" ADD COLUMN "deleted_by" text;--> statement-breakpoint
+ALTER TABLE "aml_alerts" ADD COLUMN "deleted_at" timestamp;--> statement-breakpoint
+ALTER TABLE "aml_alerts" ADD COLUMN "deleted_by" text;--> statement-breakpoint
+ALTER TABLE "debit_card_pins" ADD COLUMN "deleted_at" timestamp;--> statement-breakpoint
+ALTER TABLE "debit_card_pins" ADD COLUMN "deleted_by" text;--> statement-breakpoint
+ALTER TABLE "debit_cards" ADD COLUMN "deleted_at" timestamp;--> statement-breakpoint
+ALTER TABLE "debit_cards" ADD COLUMN "deleted_by" text;--> statement-breakpoint
+ALTER TABLE "deposits" ADD COLUMN "deleted_at" timestamp;--> statement-breakpoint
+ALTER TABLE "deposits" ADD COLUMN "deleted_by" text;--> statement-breakpoint
+ALTER TABLE "fixed_savings" ADD COLUMN "deleted_at" timestamp;--> statement-breakpoint
+ALTER TABLE "fixed_savings" ADD COLUMN "deleted_by" text;--> statement-breakpoint
+ALTER TABLE "loan_repayments" ADD COLUMN "deleted_at" timestamp;--> statement-breakpoint
+ALTER TABLE "loan_repayments" ADD COLUMN "deleted_by" text;--> statement-breakpoint
+ALTER TABLE "loans" ADD COLUMN "deleted_at" timestamp;--> statement-breakpoint
+ALTER TABLE "loans" ADD COLUMN "deleted_by" text;--> statement-breakpoint
+ALTER TABLE "messages" ADD COLUMN "deleted_by" text;--> statement-breakpoint
+ALTER TABLE "transaction_pins" ADD COLUMN "deleted_at" timestamp;--> statement-breakpoint
+ALTER TABLE "transaction_pins" ADD COLUMN "deleted_by" text;--> statement-breakpoint
+ALTER TABLE "transactions" ADD COLUMN "deleted_at" timestamp;--> statement-breakpoint
+ALTER TABLE "transactions" ADD COLUMN "deleted_by" text;--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "deleted_at" timestamp;--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "deleted_by" text;

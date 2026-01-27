@@ -1,0 +1,20 @@
+ALTER TABLE "messages" ADD COLUMN "attachment" text;--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "phone_number" varchar(20);--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "date_of_birth" date;--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "gender" varchar(10);--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "nationality" varchar(50);--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "address" text;--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "city" varchar(100);--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "state" varchar(100);--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "postal_code" varchar(20);--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "country" varchar(100);--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "occupation" varchar(100);--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "employer" varchar(200);--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "annual_income" varchar(50);--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "profile_photo" text;--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "id_type" varchar(50);--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "id_number" varchar(100);--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "id_document" text;--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "email_otp" varchar(10);--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "otp_expires_at" timestamp;--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN "verification_status" varchar(20) DEFAULT 'pending';

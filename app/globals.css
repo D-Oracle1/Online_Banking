@@ -1,0 +1,236 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: var(--color-bg-light, #f9fafb);
+    color: var(--color-text-primary, #111827);
+  }
+}
+
+/* Dynamic Theme Color Utilities */
+@layer components {
+  /* Background Colors */
+  .bg-primary {
+    background-color: var(--color-primary);
+  }
+  .bg-secondary {
+    background-color: var(--color-secondary);
+  }
+  .bg-accent {
+    background-color: var(--color-accent);
+  }
+  .bg-theme-light {
+    background-color: var(--color-bg-light);
+  }
+  .bg-theme-dark {
+    background-color: var(--color-bg-dark);
+  }
+
+  /* Text Colors */
+  .text-primary-theme {
+    color: var(--color-primary);
+  }
+  .text-secondary-theme {
+    color: var(--color-secondary);
+  }
+  .text-accent-theme {
+    color: var(--color-accent);
+  }
+  .text-theme-primary {
+    color: var(--color-text-primary);
+  }
+  .text-theme-secondary {
+    color: var(--color-text-secondary);
+  }
+  .text-theme-muted {
+    color: var(--color-text-muted);
+  }
+
+  /* Button Styles */
+  .btn-primary {
+    background-color: var(--color-btn-primary);
+    color: white;
+  }
+  .btn-primary:hover {
+    opacity: 0.9;
+  }
+  .btn-secondary {
+    background-color: var(--color-btn-secondary);
+    color: white;
+  }
+  .btn-success {
+    background-color: var(--color-btn-success);
+    color: white;
+  }
+  .btn-warning {
+    background-color: var(--color-btn-warning);
+    color: white;
+  }
+  .btn-danger {
+    background-color: var(--color-btn-danger);
+    color: white;
+  }
+
+  /* Border Colors */
+  .border-theme {
+    border-color: var(--color-border);
+  }
+  .border-primary-theme {
+    border-color: var(--color-primary);
+  }
+
+  /* Sidebar with dynamic primary color */
+  .sidebar-bg {
+    background-color: var(--color-primary);
+  }
+  .sidebar-bg-dark {
+    background-color: color-mix(in srgb, var(--color-primary) 85%, black);
+  }
+
+  /* Override common blue buttons/elements with theme primary color */
+  .bg-blue-900, .bg-blue-800, .bg-blue-700, .bg-blue-600 {
+    background-color: var(--color-primary, #1e3a8a) !important;
+  }
+  .hover\:bg-blue-900:hover, .hover\:bg-blue-800:hover, .hover\:bg-blue-700:hover {
+    background-color: color-mix(in srgb, var(--color-primary) 85%, black) !important;
+  }
+  .text-blue-900, .text-blue-800, .text-blue-700, .text-blue-600 {
+    color: var(--color-primary, #1e3a8a) !important;
+  }
+  .hover\:text-blue-900:hover, .hover\:text-blue-800:hover, .hover\:text-blue-700:hover {
+    color: color-mix(in srgb, var(--color-primary) 85%, black) !important;
+  }
+  .border-blue-900, .border-blue-800, .border-blue-700, .border-blue-600 {
+    border-color: var(--color-primary, #1e3a8a) !important;
+  }
+  .ring-blue-500, .focus\:ring-blue-500:focus {
+    --tw-ring-color: var(--color-primary) !important;
+  }
+
+  /* Override green (success) elements */
+  .bg-green-600, .bg-green-500 {
+    background-color: var(--color-btn-success, #10b981) !important;
+  }
+  .text-green-600, .text-green-500 {
+    color: var(--color-btn-success, #10b981) !important;
+  }
+
+  /* Override red (danger) elements */
+  .bg-red-600, .bg-red-500 {
+    background-color: var(--color-btn-danger, #ef4444) !important;
+  }
+  .text-red-600, .text-red-500 {
+    color: var(--color-btn-danger, #ef4444) !important;
+  }
+
+  /* Focus styles with theme color */
+  .focus\:border-blue-500:focus {
+    border-color: var(--color-primary) !important;
+  }
+  .focus\:ring-blue-500:focus {
+    --tw-ring-color: var(--color-primary) !important;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* 3D Card Flip Utilities */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .transform-style-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+
+  /* PWA Install Prompt Animation */
+  @keyframes slide-up {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
+
+  /* Splash Screen Fade-in Animation */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.8s ease-out;
+  }
+}
+
+/* Print Styles for Receipt Modals */
+@media print {
+  /* Hide everything except the receipt */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Show only the receipt content */
+  .print-receipt,
+  .print-receipt * {
+    visibility: visible;
+  }
+
+  /* Position receipt at top of page */
+  .print-receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white;
+  }
+
+  /* Hide modal overlay and buttons when printing */
+  .print-hide {
+    display: none !important;
+  }
+
+  /* Remove shadows and borders for cleaner print */
+  .print-receipt {
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+
+  /* Ensure proper page breaks */
+  .print-receipt {
+    page-break-inside: avoid;
+  }
+}
