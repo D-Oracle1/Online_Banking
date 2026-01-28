@@ -289,6 +289,10 @@
     updateCopyright(settings);
     updateTextContent(settings);
 
+    // Show the page now that settings are applied
+    document.documentElement.style.visibility = 'visible';
+    document.documentElement.style.opacity = '1';
+
     // Dispatch event for custom handling
     window.dispatchEvent(new CustomEvent('siteSettingsLoaded', { detail: settings }));
   }
