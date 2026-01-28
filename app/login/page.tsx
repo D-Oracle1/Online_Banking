@@ -48,7 +48,7 @@ export default async function LoginPage() {
             <p className="text-gray-600">{settings.tagline || 'Secure Online Banking'}</p>
           </div>
 
-          <LoginForm bankName={settings.bankName} />
+          <LoginForm />
 
           <div className="mt-6 text-center text-sm text-gray-600">
             <p>By logging in, you agree to our Terms of Service and Privacy Policy</p>
