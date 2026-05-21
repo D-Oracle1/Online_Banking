@@ -360,7 +360,7 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
+                    <td className="px-6 py-4 text-sm text-gray-500" suppressHydrationWarning>
                       {format(new Date(user.createdAt), 'MMM dd, yyyy')}
                     </td>
                     <td className="px-6 py-4">

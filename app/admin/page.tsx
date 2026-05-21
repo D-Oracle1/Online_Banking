@@ -1,17 +1,18 @@
 import { requireAdmin } from '@/lib/admin';
 import { db } from '@/server/db';
 import { users, accounts, deposits, transactions } from '@/shared/schema';
-import { eq } from 'drizzle-orm';
+import { eq, isNull } from 'drizzle-orm';
 import { Users, DollarSign, ArrowLeftRight, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { formatCurrency } from '@/lib/utils';
 
 export default async function AdminOverviewPage() {
   await requireAdmin();
 
   // Get statistics
   const [allUsers, allAccounts, pendingDeposits, recentTransactions] = await Promise.all([
-    db.select().from(users),
-    db.select().from(accounts),
+    db.select().from(users).where(isNull(users.deletedAt)),
+    db.select().from(accounts).where(isNull(accounts.deletedAt)),
     db.select().from(deposits).where(eq(deposits.status, 'PENDING')),
     db.select().from(transactions).limit(10),
   ]);
@@ -43,7 +44,7 @@ export default async function AdminOverviewPage() {
     },
     {
       label: 'Total Balance',
-      value: `$${totalBalance.toLocaleString()}`,
+      value: formatCurrency(totalBalance),
       icon: ArrowLeftRight,
       color: 'purple',
       href: '/admin/transactions',

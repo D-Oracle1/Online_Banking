@@ -1,7 +1,7 @@
 import { requireAdminAuth } from '@/lib/session';
 import { db } from '@/server/db';
 import { users } from '@/shared/schema';
-import { desc, eq } from 'drizzle-orm';
+import { desc, isNull } from 'drizzle-orm';
 import UserVerificationClient from '@/components/UserVerificationClient';
 
 export default async function UserVerificationPage() {
@@ -11,6 +11,7 @@ export default async function UserVerificationPage() {
   const allUsers = await db
     .select()
     .from(users)
+    .where(isNull(users.deletedAt))
     .orderBy(desc(users.createdAt));
 
   // Filter users who have uploaded documents and transform data

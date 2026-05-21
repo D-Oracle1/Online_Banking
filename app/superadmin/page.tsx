@@ -2,13 +2,13 @@ import { requireSuperAdmin } from '@/lib/superadmin';
 import SuperAdminClient from '@/components/SuperAdminClient';
 import { db } from '@/server/db';
 import { users, siteSettings } from '@/shared/schema';
-import { eq } from 'drizzle-orm';
+import { eq, isNull } from 'drizzle-orm';
 
 export default async function SuperAdminPage() {
   await requireSuperAdmin();
 
   // Fetch all users and admins
-  const allUsers = await db.select().from(users);
+  const allUsers = await db.select().from(users).where(isNull(users.deletedAt));
 
   // Fetch current site settings
   const settings = await db.select().from(siteSettings);
