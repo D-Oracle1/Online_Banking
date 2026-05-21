@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       .where(eq(messages.id, messageId));
 
     // Log the restoration for audit trail
-    const adminId = (session as any).userId || 'admin';
+    const adminId = session.id;
     await logRestore(adminId, 'message', messageId, request as any);
 
     return NextResponse.json({

@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     // Get current timestamp for consistent soft-delete
     const deletedAt = new Date();
-    const deletedBy = (session as any).userId || 'admin';
+    const deletedBy = session.id;
 
     // Get user's account
     const userAccount = await db.query.accounts.findFirst({

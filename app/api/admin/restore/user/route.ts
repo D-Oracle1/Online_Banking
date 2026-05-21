@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       .where(eq(users.id, userId));
 
     // 9. Log the restoration for audit trail
-    const adminId = (session as any).userId || 'admin';
+    const adminId = session.id;
     await logRestore(adminId, 'user', userId, request as any);
 
     return NextResponse.json({
