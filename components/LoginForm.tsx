@@ -69,6 +69,8 @@ export default function LoginForm() {
       // Redirect based on user role after successful login
       if (data.user.role === 'admin') {
         router.push('/admin');
+      } else if (data.user.isManager) {
+        router.push('/manager');
       } else {
         router.push('/dashboard');
       }
@@ -113,6 +115,8 @@ export default function LoginForm() {
       // Redirect based on user role after successful login
       if (data.user.role === 'admin') {
         router.push('/admin');
+      } else if (data.user.isManager) {
+        router.push('/manager');
       } else {
         router.push('/dashboard');
       }

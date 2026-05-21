@@ -40,6 +40,9 @@ export default function TransferForm({ availableBalance, accountNumber }: { avai
   const [showRestrictionModal, setShowRestrictionModal] = useState(false);
   const [restrictionCode, setRestrictionCode] = useState('');
   const [restrictionDescription, setRestrictionDescription] = useState('');
+  const [unlockCode, setUnlockCode] = useState('');
+  const [unlockError, setUnlockError] = useState('');
+  const [unlockLoading, setUnlockLoading] = useState(false);
   const [transactionRef, setTransactionRef] = useState('');
   const [transactionPin, setTransactionPin] = useState('');
   const [pendingTransfer, setPendingTransfer] = useState<PendingTransferData | null>(null);
@@ -173,6 +176,46 @@ export default function TransferForm({ availableBalance, accountNumber }: { avai
       setAmlError(error.message || 'Failed to complete transfer');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUnlockRestriction = async () => {
+    if (!unlockCode.trim()) {
+      setUnlockError('Please enter the unlock code.');
+      return;
+    }
+    setUnlockError('');
+    setUnlockLoading(true);
+    try {
+      const res = await fetch('/api/transfer/clear-restriction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: unlockCode.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setUnlockError(data.error || 'Invalid code.');
+        setUnlockLoading(false);
+        return;
+      }
+      // Restriction cleared — proceed with the transfer
+      setShowRestrictionModal(false);
+      setUnlockCode('');
+      if (!pendingTransfer) return;
+      const completeResponse = await fetch('/api/transfer/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pendingTransfer),
+      });
+      if (!completeResponse.ok) {
+        const errorData = await completeResponse.json();
+        throw new Error(errorData.error || 'Failed to complete transfer');
+      }
+      setShowSuccessModal(true);
+    } catch (error: any) {
+      setUnlockError(error.message || 'Failed to process.');
+    } finally {
+      setUnlockLoading(false);
     }
   };
 
@@ -510,9 +553,32 @@ export default function TransferForm({ availableBalance, accountNumber }: { avai
               </div>
 
               <p className="text-sm text-gray-600 text-center mb-5">
-                Please contact support and provide your restriction code to resolve this issue.
+                Contact support with your restriction code. Once support provides you an unlock code, enter it below to proceed.
               </p>
 
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Enter Unlock Code
+                </label>
+                <input
+                  type="text"
+                  value={unlockCode}
+                  onChange={(e) => { setUnlockCode(e.target.value.toUpperCase()); setUnlockError(''); }}
+                  placeholder="e.g. RST-4521"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-center font-mono text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
+                />
+                {unlockError && (
+                  <p className="text-sm text-red-600 mt-2 text-center">{unlockError}</p>
+                )}
+              </div>
+
+              <button
+                onClick={handleUnlockRestriction}
+                disabled={unlockLoading || !unlockCode.trim()}
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition duration-200 mb-3"
+              >
+                {unlockLoading ? 'Verifying...' : 'Submit Unlock Code'}
+              </button>
               <button
                 onClick={() => router.push('/dashboard/messages')}
                 className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg transition duration-200 mb-3"

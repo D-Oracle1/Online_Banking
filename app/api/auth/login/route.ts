@@ -92,6 +92,8 @@ export async function POST(request: NextRequest) {
         username: user.username,
         fullName: user.fullName,
         role: user.role || 'user',
+        isManager: user.isManager || false,
+        isSuperAdmin: user.isSuperAdmin || false,
       },
     });
   } catch (error: any) {

@@ -18,9 +18,12 @@ interface User {
   fullName: string;
   role: string;
   isSuperAdmin: boolean;
+  isManager: boolean;
   verificationStatus: string | null;
   createdAt: Date;
 }
+
+type DisplayRole = 'user' | 'manager' | 'admin' | 'superAdmin';
 
 interface SiteSettings {
   id: string;
@@ -309,7 +312,7 @@ export default function SuperAdminClient({ initialUsers, initialSettings }: Supe
   }, [settings, activeTab]);
 
   // Handle role change
-  const handleRoleChange = async (userId: string, newRole: 'user' | 'admin') => {
+  const handleRoleChange = async (userId: string, newRole: DisplayRole) => {
     try {
       setIsProcessing(true);
       const response = await fetch('/api/superadmin/update-role', {
@@ -319,11 +322,16 @@ export default function SuperAdminClient({ initialUsers, initialSettings }: Supe
       });
 
       if (response.ok) {
-        const updatedUsers = users.map(u =>
-          u.id === userId ? { ...u, role: newRole } : u
-        );
-        setUsers(updatedUsers);
-        toast.success(`User role updated to ${newRole}`);
+        setUsers(users.map(u => {
+          if (u.id !== userId) return u;
+          return {
+            ...u,
+            role: newRole === 'superAdmin' || newRole === 'admin' ? 'admin' : 'user',
+            isSuperAdmin: newRole === 'superAdmin',
+            isManager: newRole === 'manager',
+          };
+        }));
+        toast.success(`Role updated to ${newRole}`);
       } else {
         const data = await response.json();
         toast.error(data.error || 'Failed to update role');
@@ -333,6 +341,13 @@ export default function SuperAdminClient({ initialUsers, initialSettings }: Supe
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const getDisplayRole = (u: User): DisplayRole => {
+    if (u.isSuperAdmin) return 'superAdmin';
+    if (u.role === 'admin') return 'admin';
+    if (u.isManager) return 'manager';
+    return 'user';
   };
 
   // Handle user deletion
@@ -654,18 +669,17 @@ export default function SuperAdminClient({ initialUsers, initialSettings }: Supe
                         <div className="flex items-center space-x-2">
                           {!user.isSuperAdmin && (
                             <>
-                              <button
-                                onClick={() => handleRoleChange(user.id, user.role === 'admin' ? 'user' : 'admin')}
+                              <select
+                                value={getDisplayRole(user)}
+                                onChange={(e) => handleRoleChange(user.id, e.target.value as DisplayRole)}
                                 disabled={isProcessing}
-                                className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-                                  user.role === 'admin'
-                                    ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                                }`}
-                                title={user.role === 'admin' ? 'Demote to User' : 'Promote to Admin'}
+                                className="px-3 py-2 rounded-lg text-sm border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                               >
-                                {user.role === 'admin' ? 'Demote' : 'Promote'}
-                              </button>
+                                <option value="user">User</option>
+                                <option value="manager">Manager</option>
+                                <option value="admin">Admin</option>
+                                <option value="superAdmin">Super Admin</option>
+                              </select>
                               <button
                                 onClick={() => handleToggleUserStatus(user.id, user.verificationStatus || 'pending')}
                                 disabled={isProcessing}
