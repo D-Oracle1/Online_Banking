@@ -99,7 +99,7 @@ export async function POST(request: Request) {
       emailOtp: null,
       otpExpiresAt: null,
       twoFactorToken,
-      verificationStatus: 'verified',
+      verificationStatus: 'pending',
       role: 'user',
       isEmailVerified: true,
       hasSeenWelcome: false,

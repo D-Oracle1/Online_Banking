@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { User, FileText, XCircle, Eye } from 'lucide-react';
+import { User, FileText, XCircle, Eye, CheckCircle, Ban } from 'lucide-react';
 import ImageModal from './ImageModal';
 
 interface UserData {
@@ -29,10 +29,12 @@ interface UserData {
   createdAt: Date;
 }
 
-export default function UserVerificationClient({ users }: { users: UserData[] }) {
+export default function UserVerificationClient({ users: initialUsers }: { users: UserData[] }) {
+  const [userList, setUserList] = useState<UserData[]>(initialUsers);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [viewingImage, setViewingImage] = useState<{ url: string; alt: string } | null>(null);
+  const [verifying, setVerifying] = useState<string | null>(null);
 
   const handleViewDetails = (user: UserData) => {
     setSelectedUser(user);
@@ -42,6 +44,29 @@ export default function UserVerificationClient({ users }: { users: UserData[] })
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedUser(null);
+  };
+
+  const handleVerify = async (userId: string, action: 'approve' | 'reject') => {
+    setVerifying(userId + action);
+    try {
+      const res = await fetch('/api/admin/users/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, action }),
+      });
+      if (!res.ok) throw new Error('Failed');
+      const { verificationStatus } = await res.json();
+      setUserList(prev =>
+        prev.map(u => u.id === userId ? { ...u, verificationStatus } : u)
+      );
+      if (selectedUser?.id === userId) {
+        setSelectedUser(prev => prev ? { ...prev, verificationStatus } : null);
+      }
+    } catch {
+      alert('Failed to update verification status');
+    } finally {
+      setVerifying(null);
+    }
   };
 
   return (
@@ -72,7 +97,7 @@ export default function UserVerificationClient({ users }: { users: UserData[] })
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {users.map((user) => (
+              {userList.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -119,21 +144,45 @@ export default function UserVerificationClient({ users }: { users: UserData[] })
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       user.verificationStatus === 'verified'
                         ? 'bg-green-100 text-green-800'
-                        : user.verificationStatus === 'pending'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-gray-100 text-gray-800'
+                        : user.verificationStatus === 'rejected'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-yellow-100 text-yellow-800'
                     }`}>
                       {user.verificationStatus || 'pending'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button
-                      onClick={() => handleViewDetails(user)}
-                      className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
-                    >
-                      <Eye className="w-4 h-4" />
-                      View Details
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleViewDetails(user)}
+                        className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
+                      >
+                        <Eye className="w-4 h-4" />
+                        View
+                      </button>
+                      {user.verificationStatus !== 'verified' && (
+                        <button
+                          onClick={() => handleVerify(user.id, 'approve')}
+                          disabled={verifying === user.id + 'approve'}
+                          className="text-green-600 hover:text-green-900 flex items-center gap-1 disabled:opacity-50"
+                          title="Approve verification"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                          Approve
+                        </button>
+                      )}
+                      {user.verificationStatus !== 'rejected' && (
+                        <button
+                          onClick={() => handleVerify(user.id, 'reject')}
+                          disabled={verifying === user.id + 'reject'}
+                          className="text-red-600 hover:text-red-900 flex items-center gap-1 disabled:opacity-50"
+                          title="Reject verification"
+                        >
+                          <Ban className="w-4 h-4" />
+                          Reject
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -323,6 +372,26 @@ export default function UserVerificationClient({ users }: { users: UserData[] })
             </div>
 
             <div className="mt-6 flex justify-end gap-4">
+              {selectedUser.verificationStatus !== 'verified' && (
+                <button
+                  onClick={() => handleVerify(selectedUser.id, 'approve')}
+                  disabled={verifying === selectedUser.id + 'approve'}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  Approve
+                </button>
+              )}
+              {selectedUser.verificationStatus !== 'rejected' && (
+                <button
+                  onClick={() => handleVerify(selectedUser.id, 'reject')}
+                  disabled={verifying === selectedUser.id + 'reject'}
+                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+                >
+                  <Ban className="w-4 h-4" />
+                  Reject
+                </button>
+              )}
               <button
                 onClick={handleCloseModal}
                 className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
