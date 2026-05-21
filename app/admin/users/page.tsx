@@ -1,13 +1,14 @@
 import { requireAdmin } from '@/lib/admin';
 import { db } from '@/server/db';
 import { users, accounts } from '@/shared/schema';
-import { desc } from 'drizzle-orm';
+import { desc, isNull } from 'drizzle-orm';
 import AdminUsersClient from '@/components/AdminUsersClient';
 
 export default async function AdminUsersPage() {
   await requireAdmin();
 
   const allUsers = await db.query.users.findMany({
+    where: isNull(users.deletedAt),
     orderBy: [desc(users.createdAt)],
   });
 

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin';
 import { db } from '@/server/db';
 import { users, accounts } from '@/shared/schema';
-import { or, ilike, eq } from 'drizzle-orm';
+import { or, ilike, eq, and, isNull } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,9 +28,12 @@ export async function GET(request: NextRequest) {
       .from(users)
       .leftJoin(accounts, eq(users.id, accounts.userId))
       .where(
-        or(
-          ilike(users.fullName, searchTerm),
-          ilike(users.email, searchTerm)
+        and(
+          isNull(users.deletedAt),
+          or(
+            ilike(users.fullName, searchTerm),
+            ilike(users.email, searchTerm)
+          )
         )
       )
       .limit(10);
