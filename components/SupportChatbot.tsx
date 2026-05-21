@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot, User, Paperclip, XCircle } from 'lucide-react';
-import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { useFetchSiteSettings } from '@/hooks/useSiteSettings';
 
 interface Message {
   id: string;
@@ -12,8 +12,13 @@ interface Message {
   attachment?: string | null; // Base64 encoded image
 }
 
-export default function SupportChatbot() {
-  const { settings } = useSiteSettings();
+interface SupportChatbotProps {
+  userId?: string;
+  userName?: string;
+}
+
+export default function SupportChatbot({ userId: propUserId, userName: propUserName }: SupportChatbotProps = {}) {
+  const { settings } = useFetchSiteSettings();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -64,7 +69,36 @@ export default function SupportChatbot() {
     const savedSentIds = localStorage.getItem('chatbot_sent_ids');
     const savedSessionId = localStorage.getItem('chatbot_session_id');
 
-    // Load guest info
+    // If logged-in user props provided, use real identity
+    if (propUserId && propUserName) {
+      setGuestId(propUserId);
+      setGuestName(propUserName);
+      setShowNameForm(false);
+
+      // Migrate old guest messages to real user ID (fire-and-forget)
+      if (savedGuestId && savedGuestId !== propUserId) {
+        fetch('/api/user/migrate-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ guestId: savedGuestId }),
+        }).catch(() => {});
+        // Update localStorage to use real ID going forward
+        localStorage.setItem('chatbot_guest_id', propUserId);
+        localStorage.setItem('chatbot_guest_name', propUserName);
+      } else if (!savedGuestId) {
+        localStorage.setItem('chatbot_guest_id', propUserId);
+        localStorage.setItem('chatbot_guest_name', propUserName);
+      }
+
+      // Clear stale localStorage messages — real messages come from DB via polling
+      localStorage.removeItem('chatbot_messages');
+      localStorage.removeItem('chatbot_sent_ids');
+      setMessages([]);
+      setIsLoaded(true);
+      return;
+    }
+
+    // Load guest info (anonymous flow)
     if (savedGuestName && savedGuestId) {
       setGuestName(savedGuestName);
       setGuestId(savedGuestId);

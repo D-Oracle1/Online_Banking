@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (user.deletedAt) {
-      return NextResponse.json({ error: 'User is already deleted' }, { status: 400 });
+      return NextResponse.json({ success: true, message: 'User deleted successfully.' });
     }
 
     // Get current timestamp for consistent soft-delete

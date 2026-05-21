@@ -24,7 +24,7 @@ interface Message {
 
 interface Conversation {
   user: User;
-  lastMessage: Message;
+  lastMessage: Message | null;
   unreadCount: number;
 }
 
@@ -312,7 +312,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
   const totalUnread = conversations.reduce((sum, conv) => sum + conv.unreadCount, 0);
 
   return (
-    <div className={`flex h-[calc(100vh-8rem)] min-h-[600px] rounded-lg shadow-lg border ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'}`}>
+    <div className={`flex h-[calc(100vh-10rem)] md:h-[calc(100vh-8rem)] min-h-[500px] rounded-lg shadow-lg border ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'}`}>
       {/* Left Sidebar - Conversations List */}
       <div className={`w-full md:w-80 border-r flex flex-col ${darkMode ? 'border-gray-700' : 'border-gray-200'} ${selectedUser ? 'hidden md:flex' : 'flex'}`}>
         {/* Header - Fixed */}
@@ -387,18 +387,26 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
                       <p className={`text-sm font-semibold truncate ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                         {conv.user.fullName}
                       </p>
-                      <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                        {format(new Date(conv.lastMessage.createdAt), 'HH:mm')}
-                      </span>
+                      {conv.lastMessage && (
+                        <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                          {format(new Date(conv.lastMessage.createdAt), 'HH:mm')}
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center justify-between">
                       <p className={`text-xs truncate flex items-center ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                        {conv.lastMessage.senderType === 'admin' && (
-                          <span className="text-green-500 mr-1">You: </span>
+                        {conv.lastMessage ? (
+                          <>
+                            {conv.lastMessage.senderType === 'admin' && (
+                              <span className="text-green-500 mr-1">You: </span>
+                            )}
+                            {conv.lastMessage.attachment && <ImageIcon className="w-3 h-3 mr-1" />}
+                            {conv.lastMessage.message.substring(0, 25)}
+                            {conv.lastMessage.message.length > 25 && '...'}
+                          </>
+                        ) : (
+                          <span className="italic opacity-60">No messages yet</span>
                         )}
-                        {conv.lastMessage.attachment && <ImageIcon className="w-3 h-3 mr-1" />}
-                        {conv.lastMessage.message.substring(0, 25)}
-                        {conv.lastMessage.message.length > 25 && '...'}
                       </p>
                       {conv.unreadCount > 0 && (
                         <span className="bg-blue-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full ml-2">

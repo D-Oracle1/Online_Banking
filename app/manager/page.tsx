@@ -40,8 +40,8 @@ export default async function ManagerDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Welcome, {session.fullName}</h1>
-        <p className="text-gray-600 mt-1">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 break-words">Welcome, {session.fullName}</h1>
+        <p className="text-gray-600 mt-1 text-sm md:text-base">
           {isFullAdmin ? 'Viewing all users' : 'Viewing your assigned users'}
         </p>
       </div>
@@ -100,17 +100,17 @@ export default async function ManagerDashboard() {
           {usersWithAccounts.slice(0, 5).map((u) => {
             const account = u.accounts[0];
             return (
-              <div key={u.id} className="px-6 py-4 flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center">
+              <div key={u.id} className="px-4 md:px-6 py-4 flex items-center justify-between gap-3">
+                <div className="flex items-center space-x-3 min-w-0">
+                  <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
                     <span className="text-gray-600 font-semibold text-sm">{u.fullName[0]}</span>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{u.fullName}</p>
-                    <p className="text-xs text-gray-500">{u.email}</p>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{u.fullName}</p>
+                    <p className="text-xs text-gray-500 truncate">{u.email}</p>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-right flex-shrink-0">
                   <p className="text-sm font-semibold text-gray-900">
                     {account ? formatCurrency(account.balance) : '—'}
                   </p>

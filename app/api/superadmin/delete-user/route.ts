@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (userToDelete[0].deletedAt) {
-      return NextResponse.json({ error: 'User is already deleted' }, { status: 400 });
+      return NextResponse.json({ success: true, message: 'User deleted successfully.' });
     }
 
     const deletedAt = new Date();

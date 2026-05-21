@@ -1,12 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/server/db';
 import { messages } from '@/shared/schema';
 import { eq, asc, and, sql } from 'drizzle-orm';
-import { requireAdminAuth } from '@/lib/session';
+import { requireManagerAPI } from '@/lib/manager';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const session = await requireAdminAuth();
+    const session = await requireManagerAPI(request);
+    if (session instanceof NextResponse) return session;
 
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');

@@ -1,14 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/server/db';
 import { messages, users } from '@/shared/schema';
 import { nanoid } from 'nanoid';
-import { requireAdminAuth } from '@/lib/session';
+import { requireManagerAPI } from '@/lib/manager';
 import { sendNotification } from '@/server/notifications';
 import { eq } from 'drizzle-orm';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const session = await requireAdminAuth();
+    const session = await requireManagerAPI(request);
+    if (session instanceof NextResponse) return session;
 
     const body = await request.json();
     const { userId, message, attachment } = body;

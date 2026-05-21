@@ -24,6 +24,10 @@ export default async function DashboardLayout({
     where: eq(users.id, session.id),
   });
 
+  if (user?.isManager) {
+    redirect('/manager');
+  }
+
   return (
     <div className="flex h-screen" style={{ backgroundColor: 'var(--color-bg-dark, #f9fafb)' }}>
       <Sidebar />
@@ -37,7 +41,7 @@ export default async function DashboardLayout({
           {children}
         </main>
       </div>
-      <SupportChatbot />
+      <SupportChatbot userId={session.id} userName={session.fullName} />
       <PushNotificationPrompt />
     </div>
   );

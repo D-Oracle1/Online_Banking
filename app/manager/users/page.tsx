@@ -52,10 +52,10 @@ export default function ManagerUsersPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">My Users</h1>
-        <p className="text-gray-600 mt-1">{users.length} user{users.length !== 1 ? 's' : ''} assigned to you</p>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Users</h1>
+        <p className="text-gray-600 mt-1 text-sm">{users.length} user{users.length !== 1 ? 's' : ''} assigned to you</p>
       </div>
 
       <div className="relative max-w-md">
@@ -65,12 +65,56 @@ export default function ManagerUsersPage() {
           placeholder="Search users..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600"
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 text-sm"
         />
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile card view */}
+        <div className="md:hidden divide-y divide-gray-100">
+          {filtered.map((user) => {
+            const account = user.accounts[0];
+            return (
+              <div key={user.id} className="p-4 flex items-start justify-between gap-3">
+                <div className="flex items-start space-x-3 min-w-0">
+                  <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-blue-700 font-semibold text-sm">{user.fullName[0]}</span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{user.fullName}</p>
+                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                    <p className="text-xs text-gray-400">@{user.username}</p>
+                    {account && (
+                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                        <span className="text-sm font-bold text-gray-900">{formatCurrency(account.balance)}</span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${account.isActivated ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                          {account.isActivated ? 'Active' : 'Pending'}
+                        </span>
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-400 mt-1">Joined {format(new Date(user.createdAt), 'MMM dd, yyyy')}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedUser(user)}
+                  className="text-blue-600 hover:text-blue-800 flex-shrink-0 p-1"
+                  title="View Details"
+                >
+                  <Eye className="w-5 h-5" />
+                </button>
+              </div>
+            );
+          })}
+          {filtered.length === 0 && (
+            <div className="p-12 text-center text-gray-400">
+              <Users className="w-10 h-10 mx-auto mb-3 opacity-40" />
+              <p className="text-sm">No users found</p>
+            </div>
+          )}
+        </div>
+
+        {/* Desktop table view */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -140,20 +184,40 @@ export default function ManagerUsersPage() {
       {/* User detail modal */}
       {selectedUser && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">User Details</h2>
               <button onClick={() => setSelectedUser(null)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
             </div>
             <div className="space-y-3 text-sm">
-              <div className="flex justify-between py-2 border-b"><span className="text-gray-500">Full Name</span><span className="font-semibold">{selectedUser.fullName}</span></div>
-              <div className="flex justify-between py-2 border-b"><span className="text-gray-500">Email</span><span className="font-semibold">{selectedUser.email}</span></div>
-              <div className="flex justify-between py-2 border-b"><span className="text-gray-500">Username</span><span className="font-semibold">@{selectedUser.username}</span></div>
+              <div className="flex justify-between py-2 border-b gap-3">
+                <span className="text-gray-500 flex-shrink-0">Full Name</span>
+                <span className="font-semibold text-right break-words">{selectedUser.fullName}</span>
+              </div>
+              <div className="flex justify-between py-2 border-b gap-3">
+                <span className="text-gray-500 flex-shrink-0">Email</span>
+                <span className="font-semibold text-right break-all">{selectedUser.email}</span>
+              </div>
+              <div className="flex justify-between py-2 border-b gap-3">
+                <span className="text-gray-500 flex-shrink-0">Username</span>
+                <span className="font-semibold text-right">@{selectedUser.username}</span>
+              </div>
               {selectedUser.accounts[0] && (
                 <>
-                  <div className="flex justify-between py-2 border-b"><span className="text-gray-500">Account No.</span><span className="font-mono font-semibold">{selectedUser.accounts[0].accountNumber}</span></div>
-                  <div className="flex justify-between py-2 border-b"><span className="text-gray-500">Balance</span><span className="font-bold text-gray-900">{formatCurrency(selectedUser.accounts[0].balance)}</span></div>
-                  <div className="flex justify-between py-2"><span className="text-gray-500">Status</span><span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${selectedUser.accounts[0].isActivated ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{selectedUser.accounts[0].isActivated ? 'Active' : 'Pending'}</span></div>
+                  <div className="flex justify-between py-2 border-b gap-3">
+                    <span className="text-gray-500 flex-shrink-0">Account No.</span>
+                    <span className="font-mono font-semibold text-right">{selectedUser.accounts[0].accountNumber}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b gap-3">
+                    <span className="text-gray-500 flex-shrink-0">Balance</span>
+                    <span className="font-bold text-gray-900 text-right">{formatCurrency(selectedUser.accounts[0].balance)}</span>
+                  </div>
+                  <div className="flex justify-between py-2 gap-3">
+                    <span className="text-gray-500 flex-shrink-0">Status</span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${selectedUser.accounts[0].isActivated ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                      {selectedUser.accounts[0].isActivated ? 'Active' : 'Pending'}
+                    </span>
+                  </div>
                 </>
               )}
             </div>
