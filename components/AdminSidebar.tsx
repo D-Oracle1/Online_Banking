@@ -6,7 +6,7 @@ import NavigationLink from '@/components/NavigationLink';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Users, DollarSign, ArrowLeftRight,
-  MessageSquare, FileText, Settings, Shield, CreditCard, Menu, X, UserCheck, Mail, Key, Crown, ChevronLeft, ChevronRight
+  MessageSquare, FileText, Settings, Shield, CreditCard, Menu, X, UserCheck, Mail, Key, Crown, ChevronLeft, ChevronRight, ShieldAlert, UserCog
 } from 'lucide-react';
 
 const menuItems = [
@@ -14,6 +14,8 @@ const menuItems = [
   { icon: Users, label: 'Users Management', href: '/admin/users' },
   { icon: UserCheck, label: 'User Verification', href: '/admin/user-verification' },
   { icon: Key, label: 'Code Generator', href: '/admin/code-generator' },
+  { icon: ShieldAlert, label: 'Account Restrictions', href: '/admin/restrictions' },
+  { icon: UserCog, label: 'Manager Portal', href: '/manager' },
   { icon: DollarSign, label: 'Deposits Approval', href: '/admin/deposits', badgeKey: 'pendingDeposits' },
   { icon: ArrowLeftRight, label: 'Transactions', href: '/admin/transactions' },
   { icon: MessageSquare, label: 'User Messages', href: '/admin/messages', badgeKey: 'unreadMessages' },

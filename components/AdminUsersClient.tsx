@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, UserPlus, Edit, Trash2, DollarSign, Lock, Unlock, Eye, KeyRound } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, UserPlus, Trash2, DollarSign, Lock, Unlock, Eye, KeyRound, ShieldCheck, UserCog } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { format } from 'date-fns';
 
@@ -11,6 +11,9 @@ interface User {
   email: string;
   fullName: string;
   role: string;
+  isManager: boolean;
+  isSuperAdmin: boolean;
+  assignedManagerId: string | null;
   createdAt: Date;
   accounts: Array<{
     id: string;
@@ -58,6 +61,12 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
     userId: '',
     newPassword: '',
   });
+
+  // Manager assignment state
+  const [showAssignManager, setShowAssignManager] = useState(false);
+  const [assignManagerTarget, setAssignManagerTarget] = useState<User | null>(null);
+  const [availableManagers, setAvailableManagers] = useState<User[]>([]);
+  const [selectedManagerId, setSelectedManagerId] = useState('');
 
   const filteredUsers = users.filter(
     (user) =>
@@ -202,6 +211,66 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
     }
   };
 
+  const handleToggleManager = async (user: User) => {
+    const action = user.isManager ? 'Remove manager privileges from' : 'Grant manager privileges to';
+    if (!confirm(`${action} ${user.fullName}?`)) return;
+
+    setIsProcessing(true);
+    try {
+      const res = await fetch('/api/admin/users/promote-manager', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, isManager: !user.isManager }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error);
+      }
+      const data = await res.json();
+      alert(data.message);
+      window.location.reload();
+    } catch (error: any) {
+      alert(error.message || 'Failed to update manager status');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const openAssignManager = (user: User) => {
+    setAssignManagerTarget(user);
+    const managers = users.filter((u) => u.isManager || u.role === 'admin');
+    setAvailableManagers(managers);
+    setSelectedManagerId(user.assignedManagerId || '');
+    setShowAssignManager(true);
+  };
+
+  const handleAssignManager = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!assignManagerTarget) return;
+    setIsProcessing(true);
+    try {
+      const res = await fetch('/api/admin/users/assign-manager', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: assignManagerTarget.id,
+          managerId: selectedManagerId || null,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error);
+      }
+      alert('Manager assignment updated!');
+      setShowAssignManager(false);
+      window.location.reload();
+    } catch (error: any) {
+      alert(error.message || 'Failed to assign manager');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header Actions */}
@@ -280,13 +349,16 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      <span
-                        className={`inline-block px-2 py-1 text-xs font-semibold rounded ${
-                          user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
-                        }`}
-                      >
-                        {user.role}
-                      </span>
+                      <div className="flex flex-col gap-1">
+                        <span className={`inline-block px-2 py-1 text-xs font-semibold rounded w-fit ${user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'}`}>
+                          {user.role}
+                        </span>
+                        {user.isManager && (
+                          <span className="inline-block px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-800 w-fit">
+                            Manager
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
                       {format(new Date(user.createdAt), 'MMM dd, yyyy')}
@@ -338,6 +410,26 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
                               {account.isActivated ? <Lock className="w-5 h-5" /> : <Unlock className="w-5 h-5" />}
                             </button>
                           </>
+                        )}
+                        {user.role !== 'admin' && !user.isSuperAdmin && (
+                          <button
+                            onClick={() => handleToggleManager(user)}
+                            className={`${user.isManager ? 'text-orange-500 hover:text-orange-700' : 'text-blue-500 hover:text-blue-700'}`}
+                            title={user.isManager ? 'Remove Manager Role' : 'Make Manager'}
+                            disabled={isProcessing}
+                          >
+                            <ShieldCheck className="w-5 h-5" />
+                          </button>
+                        )}
+                        {user.role !== 'admin' && !user.isSuperAdmin && (
+                          <button
+                            onClick={() => openAssignManager(user)}
+                            className="text-indigo-500 hover:text-indigo-700"
+                            title="Assign Manager"
+                            disabled={isProcessing}
+                          >
+                            <UserCog className="w-5 h-5" />
+                          </button>
                         )}
                         <button
                           onClick={() => handleDeleteUser(user.id, user.fullName, user.email)}
@@ -628,6 +720,58 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
                   type="button"
                   onClick={() => setShowAdjustBalance(false)}
                   className="px-8 py-4 border-2 border-gray-300 rounded-xl hover:bg-gray-100 font-bold text-gray-700 transition-all duration-200"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Assign Manager Modal */}
+      {showAssignManager && assignManagerTarget && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="bg-indigo-700 text-white p-6 rounded-t-2xl">
+              <h2 className="text-xl font-bold">Assign Manager</h2>
+              <p className="text-indigo-200 text-sm mt-1">For: {assignManagerTarget.fullName}</p>
+            </div>
+            <form onSubmit={handleAssignManager} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Select Manager</label>
+                <select
+                  value={selectedManagerId}
+                  onChange={(e) => setSelectedManagerId(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="">— No manager (unassign) —</option>
+                  {availableManagers
+                    .filter((m) => m.id !== assignManagerTarget.id)
+                    .map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.fullName} ({m.role === 'admin' ? 'Admin' : 'Manager'})
+                      </option>
+                    ))}
+                </select>
+                {availableManagers.length === 0 && (
+                  <p className="text-sm text-orange-600 mt-2">
+                    No managers available. Promote a user to Manager first using the shield icon.
+                  </p>
+                )}
+              </div>
+              <div className="flex space-x-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={isProcessing}
+                  className="flex-1 bg-indigo-700 hover:bg-indigo-600 text-white py-2 rounded-lg disabled:opacity-50 font-semibold"
+                >
+                  {isProcessing ? 'Saving...' : 'Save Assignment'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAssignManager(false)}
+                  className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
                   Cancel
                 </button>

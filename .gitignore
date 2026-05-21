@@ -39,3 +39,4 @@ Thumbs.db
 .replit
 replit.nix
 .vercel
+.env*.local

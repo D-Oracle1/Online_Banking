@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/session';
 import { db } from '@/server/db';
-import { users } from '@/shared/schema';
-import { eq } from 'drizzle-orm';
+import { users, userRestrictions } from '@/shared/schema';
+import { eq, and } from 'drizzle-orm';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,19 +16,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user's AML code from database
     const user = await db.query.users.findFirst({
       where: eq(users.id, session.id),
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Check if AML code exists
     if (!user.amlCode) {
       return NextResponse.json(
         {
@@ -39,7 +34,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if AML code has expired
     if (user.amlCodeExpiresAt && new Date() > new Date(user.amlCodeExpiresAt)) {
       return NextResponse.json(
         {
@@ -50,7 +44,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify AML code matches
     if (user.amlCode !== amlCode.trim()) {
       return NextResponse.json(
         { error: 'Invalid AML code. Please check and try again.' },
@@ -58,7 +51,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // AML code is valid
+    // AML code is valid — now check for active restrictions
+    const activeRestrictions = await db
+      .select()
+      .from(userRestrictions)
+      .where(
+        and(
+          eq(userRestrictions.userId, session.id),
+          eq(userRestrictions.isActive, true)
+        )
+      );
+
+    if (activeRestrictions.length > 0) {
+      const restriction = activeRestrictions[0];
+      return NextResponse.json({
+        success: false,
+        hasRestriction: true,
+        restrictionCode: restriction.restrictionCode,
+        restrictionDescription: restriction.description,
+        message: 'Your account has an active restriction. Please contact support.',
+      });
+    }
+
     console.log(`[AML VERIFICATION] Valid AML code provided by user ${session.id}`);
 
     return NextResponse.json({

@@ -3,6 +3,8 @@ import { db } from '@/server/db';
 import { platformSettings } from '@/shared/schema';
 import { eq } from 'drizzle-orm';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Fetch platform settings

