@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!user.deletedAt) {
-      return NextResponse.json({ error: 'User is not deleted' }, { status: 400 });
+      return NextResponse.json({ success: true, message: 'User restored successfully' });
     }
 
     // Get user's account

@@ -60,19 +60,46 @@ export type EntityType =
 export async function logAudit(entry: AuditLogEntry) {
   const auditId = `audit-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-  const result = await db.insert(auditLogs).values({
-    id: auditId,
-    userId: entry.userId,
-    action: entry.action,
-    entityType: entry.entityType,
-    entityId: entry.entityId,
-    details: entry.details ? JSON.stringify(entry.details) : null,
-    ipAddress: entry.ipAddress || null,
-    userAgent: entry.userAgent || null,
-    createdAt: new Date(),
-  }).returning();
+  // Audit logging must never fail the operation it records
+  try {
+    const result = await db.insert(auditLogs).values({
+      id: auditId,
+      userId: entry.userId,
+      action: entry.action,
+      entityType: entry.entityType,
+      entityId: entry.entityId,
+      details: entry.details ? JSON.stringify(entry.details) : null,
+      ipAddress: entry.ipAddress || null,
+      userAgent: entry.userAgent || null,
+      createdAt: new Date(),
+    }).returning();
 
-  return result[0];
+    return result[0];
+  } catch (error) {
+    console.error('Failed to write audit log:', error);
+    return null;
+  }
+}
+
+/**
+ * Extract IP address and user agent from either an Express request
+ * or a Fetch API Request (Next.js route handlers)
+ */
+function getRequestMeta(req?: any): { ipAddress?: string; userAgent?: string } {
+  if (!req) return {};
+
+  if (req.headers && typeof req.headers.get === 'function') {
+    const forwardedFor = req.headers.get('x-forwarded-for');
+    return {
+      ipAddress: forwardedFor?.split(',')[0].trim() || req.headers.get('x-real-ip') || undefined,
+      userAgent: req.headers.get('user-agent') || undefined,
+    };
+  }
+
+  return {
+    ipAddress: req.ip || req.socket?.remoteAddress,
+    userAgent: typeof req.get === 'function' ? req.get('user-agent') : undefined,
+  };
 }
 
 /**
@@ -99,8 +126,7 @@ export async function logSoftDelete(
       deletedData: entityData,
       deletedAt: new Date().toISOString(),
     },
-    ipAddress: req?.ip || req?.socket?.remoteAddress,
-    userAgent: req?.get('user-agent'),
+    ...getRequestMeta(req),
   });
 }
 
@@ -125,8 +151,7 @@ export async function logRestore(
     details: {
       restoredAt: new Date().toISOString(),
     },
-    ipAddress: req?.ip || req?.socket?.remoteAddress,
-    userAgent: req?.get('user-agent'),
+    ...getRequestMeta(req),
   });
 }
 
@@ -158,8 +183,7 @@ export async function logPermanentDelete(
       permanentlyDeletedAt: new Date().toISOString(),
       warning: 'PERMANENT - DATA CANNOT BE RECOVERED',
     },
-    ipAddress: req?.ip || req?.socket?.remoteAddress,
-    userAgent: req?.get('user-agent'),
+    ...getRequestMeta(req),
   });
 }
 
@@ -188,8 +212,7 @@ export async function logUserDeletion(
       user: safeUserData,
       deletedAt: new Date().toISOString(),
     },
-    ipAddress: req?.ip || req?.socket?.remoteAddress,
-    userAgent: req?.get('user-agent'),
+    ...getRequestMeta(req),
   });
 }
 
@@ -215,8 +238,7 @@ export async function logBulkDelete(
       count: entityIds.length,
       deletedAt: new Date().toISOString(),
     },
-    ipAddress: req?.ip || req?.socket?.remoteAddress,
-    userAgent: req?.get('user-agent'),
+    ...getRequestMeta(req),
   });
 }
 
@@ -242,8 +264,7 @@ export async function logBulkRestore(
       count: entityIds.length,
       restoredAt: new Date().toISOString(),
     },
-    ipAddress: req?.ip || req?.socket?.remoteAddress,
-    userAgent: req?.get('user-agent'),
+    ...getRequestMeta(req),
   });
 }
 
