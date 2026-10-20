@@ -8,7 +8,10 @@ interface Branding {
   logo: string | null;
 }
 
-const defaultBranding: Branding = { bankName: 'Sterling Capital Bank', primaryColor: '#1e3a8a', logo: null };
+// Square bank-building mark from the brand assets; the wide wordmark doesn't fit the ring
+const DEFAULT_LOGO = '/assets/images/brand/favicon.png';
+
+const defaultBranding: Branding = { bankName: 'Sterling Capital Bank', primaryColor: '#1e3a8a', logo: DEFAULT_LOGO };
 
 // Fetched once per page session so loaders don't each refetch and pop the logo in late
 let cachedBranding: Branding | null = null;
@@ -25,7 +28,7 @@ function loadBranding() {
       cachedBranding = {
         bankName: data.bankName || defaultBranding.bankName,
         primaryColor: data.primaryColor || defaultBranding.primaryColor,
-        logo: data.logoUrl || data.faviconUrl || null,
+        logo: data.faviconUrl || DEFAULT_LOGO,
       };
       return cachedBranding;
     })
@@ -62,7 +65,7 @@ export default function LoadingLogo({ message, size = 72 }: { message?: string; 
         {/* Pulsing logo in the middle */}
         <div className="absolute inset-[10px] rounded-full bg-white flex items-center justify-center overflow-hidden shadow-inner animate-pulse">
           {logo ? (
-            <img src={logo} alt="" className="w-full h-full object-contain p-1.5" />
+            <img src={logo} alt="" className="w-full h-full object-contain" />
           ) : (
             <span className="font-bold text-xl" style={{ color }}>
               {(branding.bankName || 'B').charAt(0).toUpperCase()}
