@@ -178,7 +178,7 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
   };
 
   const handleDeleteUser = async (userId: string, userName: string, userEmail: string) => {
-    const confirmMessage = `⚠️ WARNING: This action cannot be undone!\n\nAre you sure you want to permanently delete:\n\nUser: ${userName}\nEmail: ${userEmail}\n\nThis will delete:\n- User account\n- All transactions\n- All loans and repayments\n- Debit cards and PINs\n- All associated data\n\nType "DELETE" to confirm:`;
+    const confirmMessage = `Are you sure you want to delete:\n\nUser: ${userName}\nEmail: ${userEmail}\n\nThe user and their accounts, transactions, loans and cards will be moved to Deleted Users, where they can be restored or permanently removed.\n\nType "DELETE" to confirm:`;
 
     const confirmation = prompt(confirmMessage);
 
@@ -202,7 +202,7 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
         throw new Error(error.error);
       }
 
-      alert(`User ${userName} has been permanently deleted.`);
+      alert(`User ${userName} has been deleted. You can restore or permanently remove them from Deleted Users.`);
       window.location.reload();
     } catch (error: any) {
       alert(error.message || 'Failed to delete user');

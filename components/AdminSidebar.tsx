@@ -6,12 +6,13 @@ import NavigationLink from '@/components/NavigationLink';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Users, DollarSign, ArrowLeftRight,
-  MessageSquare, FileText, Settings, Shield, CreditCard, Menu, X, UserCheck, Mail, Key, Crown, ChevronLeft, ChevronRight, ShieldAlert, UserCog
+  MessageSquare, FileText, Settings, Shield, CreditCard, Menu, X, UserCheck, Mail, Key, Crown, ChevronLeft, ChevronRight, ShieldAlert, UserCog, UserX
 } from 'lucide-react';
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Overview', href: '/admin' },
   { icon: Users, label: 'Users Management', href: '/admin/users' },
+  { icon: UserX, label: 'Deleted Users', href: '/admin/deleted-users' },
   { icon: UserCheck, label: 'User Verification', href: '/admin/user-verification' },
   { icon: Key, label: 'Code Generator', href: '/admin/code-generator' },
   { icon: ShieldAlert, label: 'Account Restrictions', href: '/admin/restrictions' },

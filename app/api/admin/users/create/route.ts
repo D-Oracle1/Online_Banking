@@ -26,7 +26,11 @@ export async function POST(request: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: 'Username or email already exists' },
+        {
+          error: existingUser.deletedAt
+            ? 'A deleted user with this username or email exists. Restore or permanently delete them from Deleted Users first.'
+            : 'Username or email already exists',
+        },
         { status: 409 }
       );
     }
