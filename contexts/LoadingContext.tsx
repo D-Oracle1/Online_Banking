@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
 
 interface LoadingContextType {
   isLoading: boolean;
@@ -15,18 +15,26 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
 
-  const startLoading = (message = 'Loading...') => {
-    setLoadingMessage(message);
+  // Stable references: consumers use these in effect dependencies, and a new
+  // function on every render made the loader stop as soon as it started
+  // Without a message, keep any more specific one already set for this navigation
+  const startLoading = useCallback((message?: string) => {
+    setLoadingMessage(prev => message || prev || 'Loading...');
     setIsLoading(true);
-  };
+  }, []);
 
-  const stopLoading = () => {
+  const stopLoading = useCallback(() => {
     setIsLoading(false);
     setLoadingMessage('');
-  };
+  }, []);
+
+  const value = useMemo(
+    () => ({ isLoading, loadingMessage, startLoading, stopLoading }),
+    [isLoading, loadingMessage, startLoading, stopLoading]
+  );
 
   return (
-    <LoadingContext.Provider value={{ isLoading, loadingMessage, startLoading, stopLoading }}>
+    <LoadingContext.Provider value={value}>
       {children}
     </LoadingContext.Provider>
   );
