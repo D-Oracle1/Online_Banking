@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/server/db';
-import { messages } from '@/shared/schema';
-import { eq, desc } from 'drizzle-orm';
+import { getConversationMessages } from '@/server/chat';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,13 +13,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get all messages for this guest
-    const userMessages = await db
-      .select()
-      .from(messages)
-      .where(eq(messages.userId, guestId))
-      .orderBy(desc(messages.createdAt))
-      .limit(100);
+    // Get all messages for this guest (attachments are returned as URLs)
+    const userMessages = await getConversationMessages(guestId, guestId);
 
     return NextResponse.json({
       success: true,

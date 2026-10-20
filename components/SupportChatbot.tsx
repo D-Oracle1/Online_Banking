@@ -43,6 +43,11 @@ export default function SupportChatbot({ userId: propUserId, userName: propUserN
   const nameInputRef = useRef<HTMLInputElement>(null);
   const activityIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Latest values for the polling loop, so it doesn't restart on every state change
+  const messagesRef = useRef<Message[]>([]);
+  const sentMessageIdsRef = useRef<Set<string>>(new Set());
+  messagesRef.current = messages;
+  sentMessageIdsRef.current = sentMessageIds;
 
   // Detect if on auth page (login/signup)
   useEffect(() => {
@@ -246,11 +251,26 @@ export default function SupportChatbot({ userId: propUserId, userName: propUserN
         const data = await response.json();
         const newMessages: Message[] = [];
         let hasNewAdminMessages = false;
+        const messages = messagesRef.current;
+        const sentMessageIds = sentMessageIdsRef.current;
 
         // Process all messages from the API
         data.messages.forEach((msg: any) => {
+          // Logged-in users get their full history from the server, including their own messages
+          if (propUserId && msg.senderType === 'user') {
+            if (!messages.some(m => m.id === msg.id)) {
+              newMessages.push({
+                id: msg.id,
+                text: msg.message || '(Image attachment)',
+                sender: 'user',
+                timestamp: new Date(msg.createdAt),
+                attachment: msg.attachment || null,
+              });
+            }
+          }
+
           // Pattern 1: New-style admin messages (senderType='admin')
-          if (msg.senderType === 'admin') {
+          else if (msg.senderType === 'admin') {
             // Check if we already have this admin message in our local state
             const existingMessage = messages.find(m => m.id === msg.id);
 
@@ -322,10 +342,23 @@ export default function SupportChatbot({ userId: propUserId, userName: propUserN
       }
     };
 
-    // Start polling when chat is open and user has provided name
+    // Start polling when chat is open and user has provided name.
+    // Skips a tick if the previous check is still running or the tab is hidden.
+    let isChecking = false;
+    const poll = async () => {
+      if (isChecking || document.visibilityState !== 'visible') return;
+      isChecking = true;
+      await checkForResponses();
+      isChecking = false;
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') poll();
+    };
+
     if (isOpen && guestId && !showNameForm) {
-      checkForResponses(); // Check immediately
-      pollingIntervalRef.current = setInterval(checkForResponses, 5000); // Check every 5 seconds
+      poll(); // Check immediately
+      pollingIntervalRef.current = setInterval(poll, 3000); // Check every 3 seconds
+      document.addEventListener('visibilitychange', handleVisibilityChange);
     }
 
     // Cleanup
@@ -333,8 +366,9 @@ export default function SupportChatbot({ userId: propUserId, userName: propUserN
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current);
       }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isOpen, guestId, showNameForm, sentMessageIds, messages]);
+  }, [isOpen, guestId, showNameForm, propUserId]);
 
   // Track user activity - for authenticated users only
   useEffect(() => {
@@ -478,6 +512,10 @@ export default function SupportChatbot({ userId: propUserId, userName: propUserN
         // Track the message ID so we can detect admin responses
         if (data.messageId) {
           setSentMessageIds(prev => new Set(prev).add(data.messageId));
+          // Give the local message its saved ID so polling doesn't add it a second time
+          setMessages(prev => prev.some(m => m.id === data.messageId)
+            ? prev.filter(m => m.id !== userMessage.id)
+            : prev.map(m => m.id === userMessage.id ? { ...m, id: data.messageId } : m));
         }
 
         const confirmationMessage: Message = {

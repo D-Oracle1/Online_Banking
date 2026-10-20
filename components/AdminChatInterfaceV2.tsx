@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 interface User {
   id: string;
   fullName: string;
-  email: string;
+  email: string | null;
   username: string;
   profilePhoto: string | null;
 }
@@ -24,9 +24,14 @@ interface Message {
 
 interface Conversation {
   user: User;
-  lastMessage: Message | null;
+  lastMessage: Pick<Message, 'id' | 'message' | 'attachment' | 'senderType' | 'createdAt'> | null;
   unreadCount: number;
 }
+
+const POLL_INTERVAL_MS = 2500;
+
+// Polls usually return identical data; skipping those updates avoids re-rendering
+const sameJson = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 
 interface AdminChatInterfaceProps {
   conversations: Conversation[];
@@ -38,7 +43,6 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [isSending, setIsSending] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -50,15 +54,25 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const selectedUserIdRef = useRef<string | null>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const lastMessageCountRef = useRef(0);
+
+  const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
   };
 
+  // Only scroll when messages are added, so polling doesn't yank the view
+  // back down while reading older messages
   useEffect(() => {
-    if (selectedUser) {
-      scrollToBottom();
+    if (!selectedUser) return;
+    if (messages.length > lastMessageCountRef.current) {
+      scrollToBottom(lastMessageCountRef.current === 0 ? 'auto' : 'smooth');
     }
+    lastMessageCountRef.current = messages.length;
   }, [messages, selectedUser]);
+
+  useEffect(() => {
+    lastMessageCountRef.current = 0;
+  }, [selectedUser]);
 
   // Update ref whenever selectedUser changes
   useEffect(() => {
@@ -84,44 +98,49 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
     };
   }, [selectedUser]);
 
-  // Auto-refresh
+  // Auto-refresh. Each poll waits for the previous one to finish so slow
+  // responses can't pile up, and polling pauses while the tab is hidden.
   useEffect(() => {
     const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let isRefreshing = false;
+    let stopped = false;
 
     const refreshData = async () => {
       try {
         // Store current user ID at start of request
         const currentUserId = selectedUserIdRef.current;
 
-        const convResponse = await fetch('/api/admin/chat/conversations', {
-          signal: controller.signal
-        });
+        const [convResponse, msgResponse, statusResponse] = await Promise.all([
+          fetch('/api/admin/chat/conversations', { signal: controller.signal }),
+          currentUserId
+            ? fetch(`/api/admin/chat/messages?userId=${currentUserId}`, { signal: controller.signal })
+            : null,
+          currentUserId
+            ? fetch(`/api/admin/chat/user-status?userId=${currentUserId}`, { signal: controller.signal })
+            : null,
+        ]);
+
         if (convResponse.ok) {
           const data = await convResponse.json();
-          setConversations(data.conversations);
+          setConversations(prev => sameJson(prev, data.conversations) ? prev : data.conversations);
         }
 
-        if (currentUserId) {
-          const [msgResponse, statusResponse] = await Promise.all([
-            fetch(`/api/admin/chat/messages?userId=${currentUserId}`, {
-              signal: controller.signal
-            }),
-            fetch(`/api/admin/chat/user-status?userId=${currentUserId}`, {
-              signal: controller.signal
-            })
-          ]);
+        // Only update if user hasn't changed
+        if (currentUserId && selectedUserIdRef.current === currentUserId) {
+          if (msgResponse?.ok) {
+            const data = await msgResponse.json();
+            setMessages(prev => {
+              // Keep messages that are still being sent
+              const pending = prev.filter(m => m.id.startsWith('temp-'));
+              const next = [...data.messages, ...pending];
+              return sameJson(prev, next) ? prev : next;
+            });
+          }
 
-          // Only update if user hasn't changed
-          if (selectedUserIdRef.current === currentUserId) {
-            if (msgResponse.ok) {
-              const data = await msgResponse.json();
-              setMessages(data.messages);
-            }
-
-            if (statusResponse.ok) {
-              const status = await statusResponse.json();
-              setUserStatus(status);
-            }
+          if (statusResponse?.ok) {
+            const status = await statusResponse.json();
+            setUserStatus(prev => sameJson(prev, status) ? prev : status);
           }
         }
       } catch (error: any) {
@@ -131,9 +150,29 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
       }
     };
 
-    const interval = setInterval(refreshData, 3000);
+    const poll = async () => {
+      if (stopped || isRefreshing) return;
+      clearTimeout(timer);
+      if (document.visibilityState === 'visible') {
+        isRefreshing = true;
+        await refreshData();
+        isRefreshing = false;
+      }
+      if (!stopped) timer = setTimeout(poll, POLL_INTERVAL_MS);
+    };
+
+    // Refresh straight away when returning to the tab
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') poll();
+    };
+
+    timer = setTimeout(poll, POLL_INTERVAL_MS);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
-      clearInterval(interval);
+      stopped = true;
+      clearTimeout(timer);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       controller.abort();
     };
   }, [selectedUser]);
@@ -206,26 +245,41 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
     if (!newMessage.trim() && !selectedFile) return;
     if (!selectedUser) return;
 
-    setIsSending(true);
+    const messageText = newMessage;
+    const fileToSend = selectedFile;
+    const tempId = `temp-${Date.now()}`;
 
     try {
       let attachmentBase64 = null;
 
-      if (selectedFile) {
+      if (fileToSend) {
         const reader = new FileReader();
         attachmentBase64 = await new Promise<string>((resolve, reject) => {
           reader.onloadend = () => resolve(reader.result as string);
           reader.onerror = reject;
-          reader.readAsDataURL(selectedFile);
+          reader.readAsDataURL(fileToSend);
         });
       }
+
+      // Show the message immediately; it's swapped for the saved one when the server responds
+      setMessages(prev => [...prev, {
+        id: tempId,
+        userId: selectedUser.id,
+        message: messageText || '',
+        attachment: attachmentBase64,
+        senderType: 'admin',
+        isRead: false,
+        createdAt: new Date(),
+      }]);
+      setNewMessage('');
+      handleRemoveFile();
 
       const response = await fetch('/api/admin/chat/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: selectedUser.id,
-          message: newMessage || '',
+          message: messageText || '',
           attachment: attachmentBase64,
         }),
       });
@@ -236,11 +290,12 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
       }
 
       const data = await response.json();
-      setMessages([...messages, data.message]);
-      setNewMessage('');
-      handleRemoveFile();
-      setTimeout(scrollToBottom, 100);
+      setMessages(prev => prev.some(m => m.id === data.message.id)
+        ? prev.filter(m => m.id !== tempId)
+        : prev.map(m => m.id === tempId ? data.message : m));
     } catch (error: any) {
+      setMessages(prev => prev.filter(m => m.id !== tempId));
+      setNewMessage(messageText);
       console.error('Error sending message:', error);
       const errorMsg = error.message || 'Failed to send message. Please try again.';
       alert(errorMsg);
@@ -248,8 +303,6 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
       if (errorMsg.toLowerCase().includes('payload') || errorMsg.toLowerCase().includes('size') || errorMsg.toLowerCase().includes('413')) {
         alert('The file might be too large. Please try a smaller image (under 4MB recommended).');
       }
-    } finally {
-      setIsSending(false);
     }
   };
 
@@ -266,7 +319,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
       });
 
       if (response.ok) {
-        setMessages(messages.filter(msg => msg.id !== messageId));
+        setMessages(prev => prev.filter(msg => msg.id !== messageId));
       } else {
         alert('Failed to unsend message');
       }
@@ -305,8 +358,8 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
 
   const filteredConversations = conversations.filter((conv) =>
     conv.user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conv.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conv.user.username.toLowerCase().includes(searchTerm.toLowerCase())
+    conv.user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    conv.user.username?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalUnread = conversations.reduce((sum, conv) => sum + conv.unreadCount, 0);
@@ -527,7 +580,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
                               </div>
                             )}
                           </div>
-                          {msg.senderType === 'admin' && (
+                          {msg.senderType === 'admin' && !msg.id.startsWith('temp-') && (
                             <button
                               onClick={() => handleDeleteMessage(msg.id)}
                               className={`absolute -left-8 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded ${darkMode ? 'hover:bg-gray-700 text-red-400' : 'hover:bg-gray-200 text-red-600'}`}
@@ -542,7 +595,9 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
                             {format(new Date(msg.createdAt), 'HH:mm')}
                           </span>
                           {msg.senderType === 'admin' && (
-                            msg.isRead ? (
+                            msg.id.startsWith('temp-') ? (
+                              <span className={`text-xs italic ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>Sending…</span>
+                            ) : msg.isRead ? (
                               <CheckCheck className={`w-3.5 h-3.5 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                             ) : (
                               <Check className={`w-3.5 h-3.5 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} />
@@ -615,11 +670,11 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
                   />
                   <button
                     type="submit"
-                    disabled={isSending || (!newMessage.trim() && !selectedFile)}
+                    disabled={!newMessage.trim() && !selectedFile}
                     className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 font-semibold text-sm md:text-base"
                   >
                     <Send className="w-4 h-4 md:w-5 md:h-5" />
-                    <span className="hidden sm:inline">{isSending ? 'Sending...' : 'Send'}</span>
+                    <span className="hidden sm:inline">Send</span>
                   </button>
                 </div>
               </form>

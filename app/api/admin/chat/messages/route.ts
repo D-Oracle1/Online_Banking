@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/server/db';
-import { messages } from '@/shared/schema';
-import { eq, asc, and, sql } from 'drizzle-orm';
 import { requireManagerAPI } from '@/lib/manager';
+import { getConversationMessages } from '@/server/chat';
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,16 +14,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    // Get all messages for this user (both from user and admin)
-    // Filter out soft-deleted messages
-    const userMessages = await db
-      .select()
-      .from(messages)
-      .where(and(
-        eq(messages.userId, userId),
-        sql`${messages.deletedAt} IS NULL`
-      ))
-      .orderBy(asc(messages.createdAt));
+    // All non-deleted messages for this user (both from user and admin)
+    const userMessages = await getConversationMessages(userId);
 
     return NextResponse.json({ messages: userMessages });
   } catch (error) {
