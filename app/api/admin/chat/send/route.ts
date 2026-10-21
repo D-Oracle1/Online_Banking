@@ -2,20 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/server/db';
 import { messages, users } from '@/shared/schema';
 import { nanoid } from 'nanoid';
-import { requireManagerAPI } from '@/lib/manager';
+import { requireStaffPermission } from '@/lib/manager-permissions';
 import { sendNotification } from '@/server/notifications';
 import { eq } from 'drizzle-orm';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireManagerAPI(request);
-    if (session instanceof NextResponse) return session;
-
     const body = await request.json();
     const { userId, message, attachment } = body;
 
     if (!userId || !message) {
       return NextResponse.json({ error: 'User ID and message are required' }, { status: 400 });
+    }
+
+    const session = await requireStaffPermission('sendMessages', userId);
+    if ('error' in session) {
+      return NextResponse.json({ error: session.error }, { status: session.status });
     }
 
     // Validate attachment size if present (Base64 encoded images can be large)

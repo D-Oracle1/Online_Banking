@@ -1,17 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireManagerAPI } from '@/lib/manager';
 import { getConversationMessages } from '@/server/chat';
+import { requireStaffPermission } from '@/lib/manager-permissions';
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireManagerAPI(request);
-    if (session instanceof NextResponse) return session;
-
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
 
     if (!userId) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    }
+
+    const staff = await requireStaffPermission('viewMessages', userId);
+    if ('error' in staff) {
+      return NextResponse.json({ error: staff.error }, { status: staff.status });
     }
 
     // All non-deleted messages for this user (both from user and admin)

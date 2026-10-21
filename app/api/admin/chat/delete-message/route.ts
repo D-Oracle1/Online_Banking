@@ -2,17 +2,29 @@ import { NextResponse } from 'next/server';
 import { db } from '@/server/db';
 import { messages } from '@/shared/schema';
 import { eq } from 'drizzle-orm';
-import { requireAdminAuth } from '@/lib/session';
+import { requireStaffPermission } from '@/lib/manager-permissions';
 
 export async function POST(request: Request) {
   try {
-    const session = await requireAdminAuth();
-
     const body = await request.json();
     const { messageId } = body;
 
     if (!messageId) {
       return NextResponse.json({ error: 'Message ID is required' }, { status: 400 });
+    }
+
+    const message = await db.query.messages.findFirst({
+      where: eq(messages.id, messageId),
+    });
+
+    if (!message) {
+      return NextResponse.json({ error: 'Message not found' }, { status: 404 });
+    }
+
+    // Admins can delete any message; managers only in their assigned clients' chats
+    const session = await requireStaffPermission('deleteMessages', message.userId);
+    if ('error' in session) {
+      return NextResponse.json({ error: session.error }, { status: session.status });
     }
 
     // Soft delete the message

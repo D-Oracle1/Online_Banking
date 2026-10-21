@@ -1,52 +1,117 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Eye, Users } from 'lucide-react';
+import Link from 'next/link';
+import { Search, Eye, Users, MessageSquare, Lock } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { format } from 'date-fns';
+import LoadingLogo from '@/components/LoadingLogo';
+import type { ManagerPermissions } from '@/lib/manager-permissions';
 
 interface ManagedUser {
   id: string;
   fullName: string;
   email: string;
   username: string;
-  role: string;
+  profilePhoto: string | null;
   createdAt: string;
-  accounts: Array<{
+  // Only present when the manager's rules allow it
+  contact?: {
+    phoneNumber: string | null;
+    dateOfBirth: string | null;
+    gender: string | null;
+    nationality: string | null;
+    address: string | null;
+    occupation: string | null;
+    employer: string | null;
+  };
+  accounts?: Array<{
     id: string;
     accountNumber: string;
+    accountType: string;
     balance: string;
     isActivated: boolean;
   }>;
 }
 
+interface Transaction {
+  id: string;
+  type: string;
+  amount: string;
+  status: string;
+  description: string | null;
+  createdAt: string;
+}
+
+const NO_PERMISSIONS: ManagerPermissions = {
+  viewContactInfo: false,
+  viewAccounts: false,
+  viewTransactions: false,
+  viewMessages: false,
+  sendMessages: false,
+  deleteMessages: false,
+};
+
+function DetailRow({ label, value, mono = false }: { label: string; value: React.ReactNode; mono?: boolean }) {
+  return (
+    <div className="flex justify-between py-2 border-b border-gray-100 gap-3 last:border-b-0">
+      <span className="text-gray-500 flex-shrink-0">{label}</span>
+      <span className={`font-semibold text-right break-words min-w-0 ${mono ? 'font-mono' : ''}`}>{value || '—'}</span>
+    </div>
+  );
+}
+
 export default function ManagerUsersPage() {
   const [users, setUsers] = useState<ManagedUser[]>([]);
+  const [permissions, setPermissions] = useState<ManagerPermissions>(NO_PERMISSIONS);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<ManagedUser | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[] | null>(null);
+  const [transactionsError, setTransactionsError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/manager/users')
       .then((r) => r.json())
       .then((d) => {
         setUsers(d.users || []);
+        setPermissions(d.permissions || NO_PERMISSIONS);
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, []);
 
+  // Load transactions when a client's details are opened (if allowed)
+  useEffect(() => {
+    setTransactions(null);
+    setTransactionsError(null);
+    if (!selectedUser || !permissions.viewTransactions) return;
+
+    const controller = new AbortController();
+    fetch(`/api/manager/users/${encodeURIComponent(selectedUser.id)}/transactions`, { signal: controller.signal })
+      .then(async (r) => {
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Failed to load transactions');
+        setTransactions(d.transactions);
+      })
+      .catch((e) => {
+        if (e.name !== 'AbortError') setTransactionsError(e.message);
+      });
+    return () => controller.abort();
+  }, [selectedUser, permissions.viewTransactions]);
+
+  const term = searchTerm.toLowerCase();
   const filtered = users.filter(
     (u) =>
-      u.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.username.toLowerCase().includes(searchTerm.toLowerCase())
+      u.fullName.toLowerCase().includes(term) ||
+      u.email.toLowerCase().includes(term) ||
+      u.username.toLowerCase().includes(term)
   );
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-600 border-t-transparent" />
+        <LoadingLogo message="Loading your users..." />
       </div>
     );
   }
@@ -73,7 +138,7 @@ export default function ManagerUsersPage() {
         {/* Mobile card view */}
         <div className="md:hidden divide-y divide-gray-100">
           {filtered.map((user) => {
-            const account = user.accounts[0];
+            const account = user.accounts?.[0];
             return (
               <div key={user.id} className="p-4 flex items-start justify-between gap-3">
                 <div className="flex items-start space-x-3 min-w-0">
@@ -119,16 +184,23 @@ export default function ManagerUsersPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Account</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Balance</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                {permissions.viewContactInfo && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                )}
+                {permissions.viewAccounts && (
+                  <>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Account</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Balance</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  </>
+                )}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Joined</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filtered.map((user) => {
-                const account = user.accounts[0];
+                const account = user.accounts?.[0];
                 return (
                   <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
@@ -138,21 +210,28 @@ export default function ManagerUsersPage() {
                         <p className="text-xs text-gray-400">@{user.username}</p>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      {account && <p className="text-sm font-mono text-gray-900">{account.accountNumber}</p>}
-                    </td>
-                    <td className="px-6 py-4">
-                      {account && (
-                        <p className="text-sm font-bold text-gray-900">{formatCurrency(account.balance)}</p>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      {account && (
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${account.isActivated ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                          {account.isActivated ? 'Active' : 'Pending'}
-                        </span>
-                      )}
-                    </td>
+                    {permissions.viewContactInfo && (
+                      <td className="px-6 py-4 text-sm text-gray-700">{user.contact?.phoneNumber || '—'}</td>
+                    )}
+                    {permissions.viewAccounts && (
+                      <>
+                        <td className="px-6 py-4">
+                          {account && <p className="text-sm font-mono text-gray-900">{account.accountNumber}</p>}
+                        </td>
+                        <td className="px-6 py-4">
+                          {account && (
+                            <p className="text-sm font-bold text-gray-900">{formatCurrency(account.balance)}</p>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {account && (
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${account.isActivated ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                              {account.isActivated ? 'Active' : 'Pending'}
+                            </span>
+                          )}
+                        </td>
+                      </>
+                    )}
                     <td className="px-6 py-4 text-sm text-gray-500">
                       {format(new Date(user.createdAt), 'MMM dd, yyyy')}
                     </td>
@@ -170,7 +249,7 @@ export default function ManagerUsersPage() {
               })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
+                  <td colSpan={7} className="px-6 py-12 text-center text-gray-400">
                     <Users className="w-10 h-10 mx-auto mb-3 opacity-40" />
                     <p className="text-sm">No users found</p>
                   </td>
@@ -183,50 +262,109 @@ export default function ManagerUsersPage() {
 
       {/* User detail modal */}
       {selectedUser && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6">
-            <div className="flex items-center justify-between mb-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedUser(null)}>
+          <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">User Details</h2>
               <button onClick={() => setSelectedUser(null)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
             </div>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between py-2 border-b gap-3">
-                <span className="text-gray-500 flex-shrink-0">Full Name</span>
-                <span className="font-semibold text-right break-words">{selectedUser.fullName}</span>
-              </div>
-              <div className="flex justify-between py-2 border-b gap-3">
-                <span className="text-gray-500 flex-shrink-0">Email</span>
-                <span className="font-semibold text-right break-all">{selectedUser.email}</span>
-              </div>
-              <div className="flex justify-between py-2 border-b gap-3">
-                <span className="text-gray-500 flex-shrink-0">Username</span>
-                <span className="font-semibold text-right">@{selectedUser.username}</span>
-              </div>
-              {selectedUser.accounts[0] && (
-                <>
-                  <div className="flex justify-between py-2 border-b gap-3">
-                    <span className="text-gray-500 flex-shrink-0">Account No.</span>
-                    <span className="font-mono font-semibold text-right">{selectedUser.accounts[0].accountNumber}</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b gap-3">
-                    <span className="text-gray-500 flex-shrink-0">Balance</span>
-                    <span className="font-bold text-gray-900 text-right">{formatCurrency(selectedUser.accounts[0].balance)}</span>
-                  </div>
-                  <div className="flex justify-between py-2 gap-3">
-                    <span className="text-gray-500 flex-shrink-0">Status</span>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${selectedUser.accounts[0].isActivated ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                      {selectedUser.accounts[0].isActivated ? 'Active' : 'Pending'}
-                    </span>
-                  </div>
-                </>
+
+            <div className="space-y-5 text-sm">
+              <section>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Profile</h3>
+                <DetailRow label="Full Name" value={selectedUser.fullName} />
+                <DetailRow label="Email" value={<span className="break-all">{selectedUser.email}</span>} />
+                <DetailRow label="Username" value={`@${selectedUser.username}`} />
+                <DetailRow label="Joined" value={format(new Date(selectedUser.createdAt), 'MMM dd, yyyy')} />
+              </section>
+
+              {selectedUser.contact && (
+                <section>
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Contact details</h3>
+                  <DetailRow label="Phone" value={selectedUser.contact.phoneNumber} />
+                  <DetailRow label="Date of birth" value={selectedUser.contact.dateOfBirth} />
+                  <DetailRow label="Gender" value={selectedUser.contact.gender} />
+                  <DetailRow label="Nationality" value={selectedUser.contact.nationality} />
+                  <DetailRow label="Address" value={selectedUser.contact.address} />
+                  <DetailRow label="Occupation" value={selectedUser.contact.occupation} />
+                  <DetailRow label="Employer" value={selectedUser.contact.employer} />
+                </section>
+              )}
+
+              {selectedUser.accounts && (
+                <section>
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Accounts</h3>
+                  {selectedUser.accounts.length === 0 && <p className="text-gray-500 py-2">No accounts.</p>}
+                  {selectedUser.accounts.map((a) => (
+                    <div key={a.id} className="py-2 border-b border-gray-100 last:border-b-0 flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-mono font-semibold">{a.accountNumber}</p>
+                        <p className="text-xs text-gray-500 capitalize">{a.accountType}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-gray-900">{formatCurrency(a.balance)}</p>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${a.isActivated ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                          {a.isActivated ? 'Active' : 'Pending'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </section>
+              )}
+
+              {permissions.viewTransactions && (
+                <section>
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Recent transactions</h3>
+                  {transactionsError ? (
+                    <p className="text-red-600 py-2">{transactionsError}</p>
+                  ) : transactions === null ? (
+                    <div className="flex items-center gap-2 py-3 text-gray-500">
+                      <span className="w-4 h-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin" />
+                      Loading transactions…
+                    </div>
+                  ) : transactions.length === 0 ? (
+                    <p className="text-gray-500 py-2">No transactions yet.</p>
+                  ) : (
+                    transactions.map((t) => (
+                      <div key={t.id} className="py-2 border-b border-gray-100 last:border-b-0 flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-medium text-gray-900 truncate">{t.description || t.type}</p>
+                          <p className="text-xs text-gray-500">
+                            {format(new Date(t.createdAt), 'MMM dd, yyyy h:mm a')} · {t.status}
+                          </p>
+                        </div>
+                        <p className="font-semibold text-gray-900 flex-shrink-0">{formatCurrency(t.amount)}</p>
+                      </div>
+                    ))
+                  )}
+                </section>
+              )}
+
+              {!permissions.viewContactInfo && !permissions.viewAccounts && !permissions.viewTransactions && (
+                <p className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
+                  <Lock className="w-4 h-4 flex-shrink-0" />
+                  You can only see this client&apos;s basic profile. An admin can give you more access.
+                </p>
               )}
             </div>
-            <button
-              onClick={() => setSelectedUser(null)}
-              className="w-full mt-6 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 rounded-lg transition"
-            >
-              Close
-            </button>
+
+            <div className="flex gap-2 mt-6">
+              {permissions.viewMessages && (
+                <Link
+                  href="/manager/messages"
+                  className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  Messages
+                </Link>
+              )}
+              <button
+                onClick={() => setSelectedUser(null)}
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 rounded-lg transition"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

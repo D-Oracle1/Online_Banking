@@ -2,22 +2,24 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Users, MessageSquare, LayoutDashboard, Shield, Menu, X } from 'lucide-react';
+import { Users, MessageSquare, LayoutDashboard, Shield, Menu, X, ArrowLeft } from 'lucide-react';
 import ManagerLogoutButton from './ManagerLogoutButton';
 import { usePathname } from 'next/navigation';
 
 interface ManagerSidebarProps {
   fullName: string;
+  canViewMessages: boolean;
+  isFullAdmin: boolean;
 }
 
-export default function ManagerSidebar({ fullName }: ManagerSidebarProps) {
+export default function ManagerSidebar({ fullName, canViewMessages, isFullAdmin }: ManagerSidebarProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
   const links = [
     { href: '/manager', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/manager/users', label: 'My Users', icon: Users },
-    { href: '/manager/messages', label: 'Messages', icon: MessageSquare },
+    ...(canViewMessages ? [{ href: '/manager/messages', label: 'Messages', icon: MessageSquare }] : []),
   ];
 
   const navContent = (
@@ -50,7 +52,17 @@ export default function ManagerSidebar({ fullName }: ManagerSidebarProps) {
           </Link>
         ))}
       </nav>
-      <div className="p-4 border-t border-gray-800">
+      <div className="p-4 border-t border-gray-800 space-y-2">
+        {isFullAdmin && (
+          <Link
+            href="/admin"
+            onClick={() => setOpen(false)}
+            className="flex items-center justify-center space-x-2 w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-sm text-white"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Admin Panel</span>
+          </Link>
+        )}
         <ManagerLogoutButton />
       </div>
     </>

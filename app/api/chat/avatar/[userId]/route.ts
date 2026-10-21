@@ -4,6 +4,7 @@ import { db } from '@/server/db';
 import { users } from '@/shared/schema';
 import { eq } from 'drizzle-orm';
 import { imageResponse } from '@/server/chat';
+import { canAccessClient, getStaffContext } from '@/lib/manager-permissions';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ userId: string }> }) {
   const { userId } = await params;
@@ -14,9 +15,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return new Response('Unauthorized', { status: 401 });
   }
 
+  // Users can see their own photo; admins anyone's; managers their assigned clients'
   if (viewerId !== userId) {
-    const viewer = await db.query.users.findFirst({ where: eq(users.id, viewerId) });
-    if (!viewer || (viewer.role !== 'admin' && !viewer.isManager && !viewer.isSuperAdmin)) {
+    const staff = await getStaffContext();
+    if (!staff || !(await canAccessClient(staff, userId))) {
       return new Response('Forbidden', { status: 403 });
     }
   }

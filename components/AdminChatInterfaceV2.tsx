@@ -36,9 +36,12 @@ const sameJson = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringif
 interface AdminChatInterfaceProps {
   conversations: Conversation[];
   adminId: string;
+  /** Managers may be limited to reading; admins can always send and delete */
+  canSend?: boolean;
+  canDelete?: boolean;
 }
 
-export default function AdminChatInterfaceV2({ conversations: initialConversations, adminId }: AdminChatInterfaceProps) {
+export default function AdminChatInterfaceV2({ conversations: initialConversations, adminId, canSend = true, canDelete = true }: AdminChatInterfaceProps) {
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -521,13 +524,15 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
                   )}
                 </div>
               </div>
-              <button
-                onClick={handleDeleteConversation}
-                className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-gray-700 text-red-400 hover:text-red-300' : 'hover:bg-blue-700 text-red-200 hover:text-red-100'}`}
-                title="Delete conversation"
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
+              {canDelete && (
+                <button
+                  onClick={handleDeleteConversation}
+                  className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-gray-700 text-red-400 hover:text-red-300' : 'hover:bg-blue-700 text-red-200 hover:text-red-100'}`}
+                  title="Delete conversation"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              )}
             </div>
 
             {/* Messages Area - Scrollable */}
@@ -580,7 +585,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
                               </div>
                             )}
                           </div>
-                          {msg.senderType === 'admin' && !msg.id.startsWith('temp-') && (
+                          {canDelete && msg.senderType === 'admin' && !msg.id.startsWith('temp-') && (
                             <button
                               onClick={() => handleDeleteMessage(msg.id)}
                               className={`absolute -left-8 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded ${darkMode ? 'hover:bg-gray-700 text-red-400' : 'hover:bg-gray-200 text-red-600'}`}
@@ -614,6 +619,11 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
 
             {/* Message Input - Fixed at bottom */}
             <div className={`p-3 border-t flex-shrink-0 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+              {!canSend ? (
+                <p className={`text-sm text-center py-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Read only — you don&apos;t have permission to reply to this client.
+                </p>
+              ) : (
               <form onSubmit={handleSendMessage}>
                 {previewUrl && (
                   <div className={`mb-3 p-2 rounded-lg border ${darkMode ? 'bg-green-900/20 border-green-700' : 'bg-green-50 border-green-200'}`}>
@@ -678,6 +688,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
                   </button>
                 </div>
               </form>
+              )}
             </div>
           </>
         ) : (

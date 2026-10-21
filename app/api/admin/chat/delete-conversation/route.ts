@@ -2,12 +2,10 @@ import { NextResponse } from 'next/server';
 import { db } from '@/server/db';
 import { messages } from '@/shared/schema';
 import { eq, and, sql } from 'drizzle-orm';
-import { requireAdminAuth } from '@/lib/session';
+import { requireStaffPermission } from '@/lib/manager-permissions';
 
 export async function POST(request: Request) {
   try {
-    const session = await requireAdminAuth();
-
     const body = await request.json();
     const { userId } = body;
 
@@ -15,9 +13,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
+    // Admins can delete any conversation; managers only their assigned clients'
+    const session = await requireStaffPermission('deleteMessages', userId);
+    if ('error' in session) {
+      return NextResponse.json({ error: session.error }, { status: session.status });
+    }
+
     // Soft delete all messages for this user
     const now = new Date();
-    const result = await db
+    await db
       .update(messages)
       .set({
         deletedAt: now,
