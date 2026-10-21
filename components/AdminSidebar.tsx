@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import NavigationLink from '@/components/NavigationLink';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Users, DollarSign, ArrowLeftRight,
-  MessageSquare, FileText, Settings, Shield, CreditCard, Menu, X, UserCheck, Mail, Key, Crown, ChevronLeft, ChevronRight, ShieldAlert, UserCog, UserX, MessageSquareDashed, SlidersHorizontal
+  MessageSquare, FileText, Settings, Shield, CreditCard, Menu, X, UserCheck, Mail, Key, Crown, ChevronLeft, ChevronRight, ShieldAlert, UserCog, UserX, MessageSquareDashed, SlidersHorizontal, LogOut
 } from 'lucide-react';
+import AdminNotificationBadge from '@/components/AdminNotificationBadge';
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Overview', href: '/admin' },
@@ -46,6 +47,12 @@ interface SiteSettings {
 
 export default function AdminSidebar({ isSuperAdmin = false }: AdminSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/login');
+  };
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [settings, setSettings] = useState<SiteSettings>({
@@ -125,22 +132,30 @@ export default function AdminSidebar({ isSuperAdmin = false }: AdminSidebarProps
               <Shield className="w-6 h-6" />
             </div>
             {!collapsed && (
-              <div>
+              <div className="min-w-0">
                 <h1 className="font-bold text-lg whitespace-nowrap">Admin Panel</h1>
-                <p className="text-xs text-gray-400">{settings.bankName}</p>
+                <p className="text-xs text-gray-400 truncate">{settings.bankName}</p>
               </div>
             )}
           </div>
-          {/* Close button for mobile */}
-          {showCloseButton && (
-            <button
-              onClick={closeMobileMenu}
-              className="lg:hidden text-white hover:text-gray-300 transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          )}
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {!collapsed && <AdminNotificationBadge variant="sidebar" />}
+            {/* Close button for mobile */}
+            {showCloseButton && (
+              <button
+                onClick={closeMobileMenu}
+                className="lg:hidden text-white hover:text-gray-300 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            )}
+          </div>
         </div>
+        {collapsed && (
+          <div className="flex justify-center mt-3">
+            <AdminNotificationBadge variant="sidebar" />
+          </div>
+        )}
       </div>
 
       <nav className="flex-1 overflow-y-auto py-4 scrollbar-hide">
@@ -201,7 +216,7 @@ export default function AdminSidebar({ isSuperAdmin = false }: AdminSidebarProps
         </div>
       </nav>
 
-      <div className={`p-4 border-t border-gray-800 ${collapsed ? 'px-2' : ''}`}>
+      <div className={`p-4 border-t border-gray-800 space-y-2 ${collapsed ? 'px-2' : ''}`}>
         <NavigationLink
           href="/dashboard"
           onClick={closeMobileMenu}
@@ -215,6 +230,14 @@ export default function AdminSidebar({ isSuperAdmin = false }: AdminSidebarProps
             <span>← Back to User Dashboard</span>
           )}
         </NavigationLink>
+        <button
+          onClick={handleLogout}
+          title={collapsed ? 'Logout' : ''}
+          className={`w-full flex items-center ${collapsed ? 'justify-center' : 'justify-center space-x-2'} px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-sm text-white`}
+        >
+          <LogOut className="w-4 h-4" />
+          {!collapsed && <span>Logout</span>}
+        </button>
       </div>
     </>
   );
@@ -230,7 +253,7 @@ export default function AdminSidebar({ isSuperAdmin = false }: AdminSidebarProps
       </button>
 
       {/* Desktop Sidebar */}
-      <aside className={`hidden lg:flex ${isCollapsed ? 'w-20' : 'w-64'} bg-gray-900 text-white flex-col h-screen sticky top-0 transition-all duration-300 ease-in-out`}>
+      <aside className={`hidden lg:flex ${isCollapsed ? 'w-20' : 'w-64'} bg-gray-900 text-white flex-col h-screen sticky top-0 z-30 flex-shrink-0 transition-all duration-300 ease-in-out`}>
         <SidebarContent collapsed={isCollapsed} />
 
         {/* Collapse Toggle Button */}

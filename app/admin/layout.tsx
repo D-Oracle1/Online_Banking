@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/session';
 import AdminSidebar from '@/components/AdminSidebar';
-import AdminHeader from '@/components/AdminHeader';
 import PushNotificationPrompt from '@/components/PushNotificationPrompt';
 
 export default async function AdminLayout({
@@ -24,9 +23,10 @@ export default async function AdminLayout({
   return (
     <div className="flex h-screen bg-gray-50">
       <AdminSidebar isSuperAdmin={session.isSuperAdmin || false} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <AdminHeader admin={session} />
-        <main className="flex-1 overflow-y-auto p-3 md:p-6">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        {/* No top header: notifications and logout live in the sidebar.
+            Extra top padding below lg keeps content clear of the floating menu button. */}
+        <main className="flex-1 overflow-y-auto p-3 pt-16 md:p-6 md:pt-16 lg:pt-6">
           {children}
         </main>
       </div>

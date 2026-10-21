@@ -11,7 +11,13 @@ interface Notifications {
   total: number;
 }
 
-export default function AdminNotificationBadge() {
+interface AdminNotificationBadgeProps {
+  /** 'sidebar': light icon on the dark sidebar, dropdown opens to the right */
+  variant?: 'header' | 'sidebar';
+}
+
+export default function AdminNotificationBadge({ variant = 'header' }: AdminNotificationBadgeProps) {
+  const inSidebar = variant === 'sidebar';
   const [notifications, setNotifications] = useState<Notifications>({
     pendingDeposits: 0,
     pendingLoans: 0,
@@ -43,9 +49,13 @@ export default function AdminNotificationBadge() {
     <div className="relative">
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+        className={`relative p-2 rounded-lg transition-colors ${
+          inSidebar ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+        }`}
+        title="Notifications"
+        aria-label="Notifications"
       >
-        <Bell className="w-6 h-6" />
+        <Bell className={inSidebar ? 'w-5 h-5' : 'w-6 h-6'} />
         {notifications.total > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
             {notifications.total > 9 ? '9+' : notifications.total}
@@ -63,7 +73,9 @@ export default function AdminNotificationBadge() {
           ></div>
 
           {/* Dropdown Content */}
-          <div className="absolute right-0 mt-2 w-[calc(100vw-1rem)] max-w-sm md:w-80 bg-white rounded-xl shadow-lg border border-gray-200 z-20 overflow-hidden">
+          <div className={`absolute mt-2 bg-white rounded-xl shadow-lg border border-gray-200 z-20 overflow-hidden text-left ${
+            inSidebar ? 'left-0 w-72 max-w-[calc(100vw-2rem)]' : 'right-0 w-[calc(100vw-1rem)] max-w-sm md:w-80'
+          }`}>
             <div className="bg-blue-900 text-white px-3 py-2.5 md:px-4 md:py-3">
               <h3 className="font-semibold text-sm md:text-base">Notifications</h3>
               <p className="text-xs text-blue-200">

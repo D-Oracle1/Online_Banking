@@ -17,12 +17,15 @@ export default async function AdminMessagesPage() {
   const conversations = await getConversations();
 
   return (
-    <div>
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Messages & Support</h1>
-        <MergeDuplicateChats />
-      </div>
-      <AdminChatInterfaceV2 conversations={conversations} adminId={session.id} />
+    // Cancel the layout's padding so the blue chat header sits at the very top
+    <div className="-m-3 -mt-16 md:-m-6 md:-mt-16 lg:-mt-6">
+      <h1 className="sr-only">Messages & Support</h1>
+      <AdminChatInterfaceV2
+        conversations={conversations}
+        adminId={session.id}
+        fullScreen
+        headerActions={<MergeDuplicateChats compact />}
+      />
     </div>
   );
 }

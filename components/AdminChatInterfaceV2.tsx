@@ -44,9 +44,13 @@ interface AdminChatInterfaceProps {
   /** Managers may be limited to reading; admins can always send and delete */
   canSend?: boolean;
   canDelete?: boolean;
+  /** Fill the whole content area, with the blue chat header as the top of the page */
+  fullScreen?: boolean;
+  /** Extra buttons shown in the chat list header */
+  headerActions?: React.ReactNode;
 }
 
-export default function AdminChatInterfaceV2({ conversations: initialConversations, adminId, canSend = true, canDelete = true }: AdminChatInterfaceProps) {
+export default function AdminChatInterfaceV2({ conversations: initialConversations, adminId, canSend = true, canDelete = true, fullScreen = false, headerActions }: AdminChatInterfaceProps) {
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   // Read from the live list so a person's new sender IDs join the open chat
@@ -395,11 +399,15 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
   const totalUnread = conversations.reduce((sum, conv) => sum + conv.unreadCount, 0);
 
   return (
-    <div className={`flex h-[calc(100vh-10rem)] md:h-[calc(100vh-8rem)] min-h-[500px] rounded-lg shadow-lg border ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'}`}>
+    <div className={`flex ${
+      fullScreen
+        ? 'h-screen'
+        : 'h-[calc(100vh-10rem)] md:h-[calc(100vh-8rem)] min-h-[500px] rounded-lg shadow-lg border'
+    } ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'}`}>
       {/* Left Sidebar - Conversations List */}
       <div className={`w-full md:w-80 border-r flex flex-col ${darkMode ? 'border-gray-700' : 'border-gray-200'} ${selectedUser ? 'hidden md:flex' : 'flex'}`}>
         {/* Header - Fixed */}
-        <div className={`p-3 border-b flex-shrink-0 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gradient-to-r from-blue-900 to-blue-800 border-gray-200'}`}>
+        <div className={`p-3 border-b flex-shrink-0 ${fullScreen ? 'pl-16 lg:pl-3' : ''} ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gradient-to-r from-blue-900 to-blue-800 border-gray-200'}`}>
           <div className="flex items-center justify-between mb-2">
             <h2 className={`text-lg font-bold flex items-center ${darkMode ? 'text-white' : 'text-white'}`}>
               <MessageSquare className="w-5 h-5 mr-2" />
@@ -410,12 +418,16 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
                 </span>
               )}
             </h2>
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className={`p-1.5 rounded-lg transition-colors ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-800 hover:bg-blue-700'}`}
-            >
-              {darkMode ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-white" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              {headerActions}
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className={`p-1.5 rounded-lg transition-colors ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-800 hover:bg-blue-700'}`}
+                title={darkMode ? 'Light mode' : 'Dark mode'}
+              >
+                {darkMode ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-white" />}
+              </button>
+            </div>
           </div>
           <div className="relative">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
@@ -510,7 +522,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
         {selectedUser ? (
           <>
             {/* Chat Header - Fixed */}
-            <div className={`p-2.5 border-b flex items-center flex-shrink-0 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gradient-to-r from-blue-900 to-blue-800 border-gray-200'}`}>
+            <div className={`p-2.5 border-b flex items-center flex-shrink-0 ${fullScreen ? 'pl-16 md:pl-2.5' : ''} ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gradient-to-r from-blue-900 to-blue-800 border-gray-200'}`}>
               {/* Back Button - Mobile Only */}
               <button
                 onClick={() => setSelectedKey(null)}

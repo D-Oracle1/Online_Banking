@@ -11,7 +11,7 @@ import type { MergePlan } from '@/server/chat-merge';
  * Admin tool: find people whose messages are split across several sender IDs
  * and combine each person's messages under one ID. Shows a preview first.
  */
-export default function MergeDuplicateChats() {
+export default function MergeDuplicateChats({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [plan, setPlan] = useState<MergePlan | null>(null);
@@ -58,13 +58,25 @@ export default function MergeDuplicateChats() {
 
   return (
     <>
-      <button
-        onClick={openPreview}
-        className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-      >
-        <Combine className="w-4 h-4" />
-        Merge duplicate chats
-      </button>
+      {compact ? (
+        // Icon button for the blue chat header
+        <button
+          onClick={openPreview}
+          className="p-1.5 rounded-lg bg-blue-800 hover:bg-blue-700 transition-colors"
+          title="Merge duplicate chats"
+          aria-label="Merge duplicate chats"
+        >
+          <Combine className="w-4 h-4 text-white" />
+        </button>
+      ) : (
+        <button
+          onClick={openPreview}
+          className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          <Combine className="w-4 h-4" />
+          Merge duplicate chats
+        </button>
+      )}
 
       {open && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => !merging && setOpen(false)}>
