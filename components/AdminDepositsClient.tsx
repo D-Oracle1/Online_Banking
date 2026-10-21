@@ -111,7 +111,7 @@ export default function AdminDepositsClient({ deposits: initialDeposits }: Admin
               onClick={() => setFilter(status as any)}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === status
-                  ? 'bg-gray-900 text-white'
+                  ? 'bg-blue-900 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -171,7 +171,7 @@ export default function AdminDepositsClient({ deposits: initialDeposits }: Admin
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs font-semibold rounded bg-gray-100 text-gray-900">
+                      <span className="px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-800">
                         {deposit.paymentMethod}
                       </span>
                     </td>
@@ -198,7 +198,7 @@ export default function AdminDepositsClient({ deposits: initialDeposits }: Admin
                       <div className="flex space-x-2">
                         <button
                           onClick={() => setSelectedDeposit(deposit)}
-                          className="text-gray-900 hover:text-gray-600"
+                          className="text-blue-600 hover:text-blue-800"
                           title="View Details"
                         >
                           <Eye className="w-5 h-5" />
@@ -237,7 +237,7 @@ export default function AdminDepositsClient({ deposits: initialDeposits }: Admin
       {selectedDeposit && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto">
-            <div className="bg-gray-900 text-white p-6 rounded-t-3xl flex items-center justify-between">
+            <div className="bg-blue-900 text-white p-6 rounded-t-3xl flex items-center justify-between">
               <h2 className="text-2xl font-bold">Deposit Details</h2>
               <button
                 onClick={() => setSelectedDeposit(null)}

@@ -102,13 +102,13 @@ export default function AdminRestrictionsPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="Search by name, email, or username"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <button
             onClick={handleSearch}
             disabled={loading}
-            className="bg-gray-900 hover:bg-gray-700 disabled:bg-gray-400 text-white font-semibold px-6 py-3 rounded-full flex items-center gap-2"
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold px-6 py-3 rounded-full flex items-center gap-2"
           >
             <Search className="w-5 h-5" />
             {loading ? 'Searching...' : 'Search'}
@@ -128,7 +128,7 @@ export default function AdminRestrictionsPage() {
                 </div>
                 <button
                   onClick={() => loadRestrictions(u)}
-                  className="bg-gray-900 hover:bg-gray-700 text-white px-4 py-2 rounded-full text-sm font-semibold"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm font-semibold"
                 >
                   Manage Restrictions
                 </button>

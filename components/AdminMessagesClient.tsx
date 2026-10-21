@@ -241,7 +241,7 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {format(new Date(message.createdAt), 'MMM dd, yyyy HH:mm')}
                     </td>
                     <td className="px-6 py-4">

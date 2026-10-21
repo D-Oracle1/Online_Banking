@@ -14,6 +14,13 @@ const config: Config = {
           dark: 'var(--color-primary)',
           light: 'var(--color-primary)',
         },
+        // The bank's primary colour from Settings ("banking blue"), with derived shades
+        brand: {
+          DEFAULT: 'var(--color-primary, #1e3a8a)',
+          dark: 'color-mix(in srgb, var(--color-primary, #1e3a8a) 82%, black)',
+          soft: 'color-mix(in srgb, var(--color-primary, #1e3a8a) 10%, white)',
+          tint: 'color-mix(in srgb, var(--color-primary, #1e3a8a) 4%, white)',
+        },
         secondary: 'var(--color-secondary)',
         accent: 'var(--color-accent)',
         success: 'var(--color-btn-success)',

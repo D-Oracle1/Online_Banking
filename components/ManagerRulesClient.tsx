@@ -108,7 +108,7 @@ export default function ManagerRulesClient({ managers: initialManagers, clients:
         return (
           <div key={manager.id} className="bg-white rounded-3xl shadow-sm overflow-hidden">
             <div className="px-4 md:px-6 py-4 border-b border-gray-100 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gray-100 text-gray-900 font-bold flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-900 font-bold flex items-center justify-center flex-shrink-0">
                 {manager.fullName.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0">
@@ -150,7 +150,7 @@ export default function ManagerRulesClient({ managers: initialManagers, clients:
                             disabled={blocked || saving}
                             onChange={e => updatePermission(manager, option.key, e.target.checked)}
                           />
-                          <span className="w-11 h-6 rounded-full bg-gray-300 peer-checked:bg-green-600 peer-focus-visible:ring-2 peer-focus-visible:ring-gray-900 transition-colors" />
+                          <span className="w-11 h-6 rounded-full bg-gray-300 peer-checked:bg-green-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500 transition-colors" />
                           <span className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-5" />
                         </span>
                       </label>
@@ -192,7 +192,7 @@ export default function ManagerRulesClient({ managers: initialManagers, clients:
                   <select
                     value={selectedClient}
                     onChange={e => setAssignTarget(prev => ({ ...prev, [manager.id]: e.target.value }))}
-                    className="flex-1 min-w-0 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-gray-900"
+                    className="flex-1 min-w-0 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Assign a client…</option>
                     {available.map(client => (
@@ -207,7 +207,7 @@ export default function ManagerRulesClient({ managers: initialManagers, clients:
                       setAssignTarget(prev => ({ ...prev, [manager.id]: '' }));
                     }}
                     disabled={!selectedClient || savingKey === `assign-${selectedClient}`}
-                    className="flex items-center gap-1 px-3 py-2 text-sm bg-gray-900 text-white rounded-full hover:bg-gray-700 disabled:opacity-50 flex-shrink-0"
+                    className="flex items-center gap-1 px-3 py-2 text-sm bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 flex-shrink-0"
                   >
                     <UserPlus className="w-4 h-4" />
                     Assign

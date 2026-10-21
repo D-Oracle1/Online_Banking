@@ -103,7 +103,7 @@ export default function BulkEmailClient({ users }: BulkEmailClientProps) {
             <button
               type="button"
               onClick={handleSelectAll}
-              className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-100 text-gray-800 font-medium rounded-lg transition text-sm"
+              className="w-full px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium rounded-lg transition text-sm"
             >
               {selectedUsers.length === users.length ? 'Deselect All' : 'Select All'}
             </button>
@@ -116,7 +116,7 @@ export default function BulkEmailClient({ users }: BulkEmailClientProps) {
                 onClick={() => handleToggleUser(user.id)}
                 className={`p-4 border-b border-gray-100 cursor-pointer transition ${
                   selectedUsers.includes(user.id)
-                    ? 'bg-gray-100 hover:bg-gray-100'
+                    ? 'bg-blue-50 hover:bg-blue-100'
                     : 'hover:bg-gray-50'
                 }`}
               >
@@ -126,7 +126,7 @@ export default function BulkEmailClient({ users }: BulkEmailClientProps) {
                       type="checkbox"
                       checked={selectedUsers.includes(user.id)}
                       onChange={() => {}}
-                      className="w-4 h-4 text-gray-900 rounded focus:ring-gray-900"
+                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                     />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -164,7 +164,7 @@ export default function BulkEmailClient({ users }: BulkEmailClientProps) {
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter email subject"
               />
             </div>
@@ -179,7 +179,7 @@ export default function BulkEmailClient({ users }: BulkEmailClientProps) {
                 onChange={(e) => setMessage(e.target.value)}
                 required
                 rows={12}
-                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter your message here..."
               />
               <p className="text-xs text-gray-500 mt-1">
@@ -219,7 +219,7 @@ export default function BulkEmailClient({ users }: BulkEmailClientProps) {
           <button
             type="submit"
             disabled={isSending || selectedUsers.length === 0 || !subject || !message}
-            className="w-full bg-gray-900 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+            className="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-3 px-6 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
           >
             <Send className="w-5 h-5" />
             <span>{isSending ? 'Sending...' : `Send Email to ${selectedUsers.length} User(s)`}</span>

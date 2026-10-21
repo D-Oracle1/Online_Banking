@@ -407,7 +407,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
       {/* Left Sidebar - Conversations List */}
       <div className={`w-full md:w-80 border-r flex flex-col ${darkMode ? 'border-gray-700' : 'border-gray-200'} ${selectedUser ? 'hidden md:flex' : 'flex'}`}>
         {/* Header - Fixed */}
-        <div className={`p-3 border-b flex-shrink-0 ${fullScreen ? 'pl-16 lg:pl-3' : ''} ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gradient-to-r from-gray-900 to-gray-900 border-gray-200'}`}>
+        <div className={`p-3 border-b flex-shrink-0 ${fullScreen ? 'pl-16 lg:pl-3' : ''} ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gradient-to-r from-blue-900 to-blue-800 border-gray-200'}`}>
           <div className="flex items-center justify-between mb-2">
             <h2 className={`text-lg font-bold flex items-center ${darkMode ? 'text-white' : 'text-white'}`}>
               <MessageSquare className="w-5 h-5 mr-2" />
@@ -422,7 +422,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
               {headerActions}
               <button
                 onClick={() => setDarkMode(!darkMode)}
-                className={`p-1.5 rounded-lg transition-colors ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-white/10 hover:bg-white/20'}`}
+                className={`p-1.5 rounded-lg transition-colors ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-800 hover:bg-blue-700'}`}
                 title={darkMode ? 'Light mode' : 'Dark mode'}
               >
                 {darkMode ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-white" />}
@@ -436,7 +436,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
               placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className={`w-full pl-8 pr-3 py-1.5 rounded-xl border text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'}`}
+              className={`w-full pl-8 pr-3 py-1.5 rounded-lg border text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'}`}
             />
           </div>
         </div>
@@ -455,7 +455,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
                 onClick={() => setSelectedKey(conv.user.key)}
                 className={`p-2.5 border-b cursor-pointer transition-colors ${
                   selectedKey === conv.user.key
-                    ? darkMode ? 'bg-gray-800 border-l-4 border-l-white' : 'bg-gray-100 border-l-4 border-l-gray-900'
+                    ? darkMode ? 'bg-gray-800 border-l-4 border-l-blue-500' : 'bg-blue-50 border-l-4 border-l-blue-600'
                     : darkMode ? 'border-gray-800 hover:bg-gray-800' : 'border-gray-100 hover:bg-gray-50'
                 }`}
               >
@@ -472,7 +472,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
                         }}
                       />
                     ) : (
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-gray-700 to-gray-700'}`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${darkMode ? 'bg-blue-600' : 'bg-gradient-to-br from-blue-500 to-blue-600'}`}>
                         {conv.user.fullName.charAt(0).toUpperCase()}
                       </div>
                     )}
@@ -504,7 +504,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
                         )}
                       </p>
                       {conv.unreadCount > 0 && (
-                        <span className="bg-gray-900 text-white text-xs font-bold px-1.5 py-0.5 rounded-full ml-2">
+                        <span className="bg-blue-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full ml-2">
                           {conv.unreadCount}
                         </span>
                       )}
@@ -522,11 +522,11 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
         {selectedUser ? (
           <>
             {/* Chat Header - Fixed */}
-            <div className={`p-2.5 border-b flex items-center flex-shrink-0 ${fullScreen ? 'pl-16 md:pl-2.5' : ''} ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gradient-to-r from-gray-900 to-gray-900 border-gray-200'}`}>
+            <div className={`p-2.5 border-b flex items-center flex-shrink-0 ${fullScreen ? 'pl-16 md:pl-2.5' : ''} ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gradient-to-r from-blue-900 to-blue-800 border-gray-200'}`}>
               {/* Back Button - Mobile Only */}
               <button
                 onClick={() => setSelectedKey(null)}
-                className={`md:hidden mr-2 p-1.5 rounded-lg transition-colors ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-white/10'}`}
+                className={`md:hidden mr-2 p-1.5 rounded-lg transition-colors ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-blue-700'}`}
               >
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -541,7 +541,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
                   onClick={() => setLightboxImage(selectedUser.profilePhoto)}
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-900 font-bold text-sm">
+                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-blue-900 font-bold text-sm">
                   {selectedUser.fullName.charAt(0).toUpperCase()}
                 </div>
               )}
@@ -558,7 +558,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
                   ) : (
                     <>
                       <span className={`w-2 h-2 rounded-full ${darkMode ? 'bg-gray-600' : 'bg-gray-400'}`}></span>
-                      <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-300'}`}>Offline</p>
+                      <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-blue-100'}`}>Offline</p>
                     </>
                   )}
                 </div>
@@ -566,7 +566,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
               {canDelete && (
                 <button
                   onClick={handleDeleteConversation}
-                  className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-gray-700 text-red-400 hover:text-red-300' : 'hover:bg-white/10 text-red-200 hover:text-red-100'}`}
+                  className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-gray-700 text-red-400 hover:text-red-300' : 'hover:bg-blue-700 text-red-200 hover:text-red-100'}`}
                   title="Delete conversation"
                 >
                   <Trash2 className="w-5 h-5" />
@@ -579,7 +579,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
               <div className="space-y-3 max-w-5xl mx-auto">
                 {isLoadingMessages ? (
                   <div className={`text-center py-8 ${darkMode ? 'text-gray-500' : 'text-gray-600'}`}>
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-3"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-3"></div>
                     <p className="text-sm">Loading messages...</p>
                   </div>
                 ) : messages.length === 0 ? (
@@ -596,7 +596,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
                       <div className={`max-w-[85%] md:max-w-[70%] lg:max-w-[60%] ${msg.senderType === 'admin' ? 'order-2' : 'order-1'}`}>
                         {msg.senderType === 'user' && (
                           <div className="flex items-center space-x-1.5 mb-1">
-                            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold ${darkMode ? 'bg-gray-900' : 'bg-gray-900'}`}>
+                            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold ${darkMode ? 'bg-blue-600' : 'bg-blue-600'}`}>
                               {selectedUser.fullName.charAt(0).toUpperCase()}
                             </div>
                             <span className={`text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{selectedUser.fullName}</span>
@@ -642,7 +642,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
                             msg.id.startsWith('temp-') ? (
                               <span className={`text-xs italic ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>Sending…</span>
                             ) : msg.isRead ? (
-                              <CheckCheck className={`w-3.5 h-3.5 ${darkMode ? 'text-white' : 'text-gray-900'}`} />
+                              <CheckCheck className={`w-3.5 h-3.5 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                             ) : (
                               <Check className={`w-3.5 h-3.5 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} />
                             )
@@ -709,7 +709,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type a message..."
-                    className={`flex-1 px-4 py-2.5 border rounded-xl text-sm md:text-base focus:ring-2 focus:ring-gray-900 focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'}`}
+                    className={`flex-1 px-4 py-2.5 border rounded-lg text-sm md:text-base focus:ring-2 focus:ring-blue-500 focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'}`}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();

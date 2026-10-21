@@ -54,7 +54,7 @@ export default function AdminNotificationBadge({ variant = 'circle' }: AdminNoti
         onClick={() => setShowDropdown(!showDropdown)}
         className={`relative transition-colors ${
           isCircle
-            ? 'w-11 h-11 rounded-full bg-white shadow-sm text-gray-900 hover:bg-gray-50 flex items-center justify-center'
+            ? 'w-11 h-11 rounded-full bg-white shadow-sm text-brand hover:bg-brand-tint flex items-center justify-center'
             : 'p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100'
         }`}
         title="Notifications"
@@ -81,9 +81,9 @@ export default function AdminNotificationBadge({ variant = 'circle' }: AdminNoti
           <div className={`bg-white rounded-2xl shadow-lg border border-gray-200 z-20 overflow-hidden text-left ${
             isCircle ? 'absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)]' : 'fixed left-4 right-4 top-20 max-w-sm'
           }`}>
-            <div className="bg-gray-900 text-white px-3 py-2.5 md:px-4 md:py-3">
+            <div className="bg-brand text-white px-3 py-2.5 md:px-4 md:py-3">
               <h3 className="font-semibold text-sm md:text-base">Notifications</h3>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-white/70">
                 {notifications.total} pending item{notifications.total !== 1 ? 's' : ''}
               </p>
             </div>
@@ -165,7 +165,7 @@ export default function AdminNotificationBadge({ variant = 'circle' }: AdminNoti
                     setShowDropdown(false);
                     fetchNotifications();
                   }}
-                  className="text-xs text-gray-900 hover:text-gray-600 font-medium"
+                  className="text-xs text-brand hover:text-brand-dark font-medium"
                 >
                   Refresh Notifications
                 </button>

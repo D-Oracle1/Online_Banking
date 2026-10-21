@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { formatCurrency } from '@/lib/utils';
 import type { WeekDay } from '@/server/admin-overview';
 
-// Monochrome design: near-black solid line vs mid-grey dashed line.
-// Dashes are the secondary encoding, so the two never rely on shade alone.
-const DEPOSITS_COLOR = '#111111';
+// Banking blue solid line vs mid-grey dashed line.
+// Dashes are the secondary encoding, so the two never rely on colour alone.
+const DEPOSITS_COLOR = 'var(--color-primary, #1e3a8a)';
 const OUTGOING_COLOR = '#71717a';
 
 const WIDTH = 300;
@@ -57,7 +57,7 @@ export default function WeeklyActivityChart({ week }: { week: WeekDay[] }) {
       {/* Legend: always shown for two series; swatches show line style too */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-600 mb-3">
         <span className="flex items-center gap-1.5">
-          <svg width="16" height="6" aria-hidden="true"><line x1="0" y1="3" x2="16" y2="3" stroke={DEPOSITS_COLOR} strokeWidth="2" strokeLinecap="round" /></svg>
+          <svg width="16" height="6" aria-hidden="true"><line x1="0" y1="3" x2="16" y2="3" style={{ stroke: DEPOSITS_COLOR }} strokeWidth="2" strokeLinecap="round" /></svg>
           Deposits
         </span>
         <span className="flex items-center gap-1.5">
@@ -72,11 +72,11 @@ export default function WeeklyActivityChart({ week }: { week: WeekDay[] }) {
           className="absolute -top-1 z-10 -translate-x-1/2 pointer-events-none"
           style={{ left: `clamp(3.5rem, ${activeLeft}, calc(100% - 3.5rem))` }}
         >
-          <div className="bg-gray-900 text-white text-[11px] leading-tight rounded-lg px-2 py-1 whitespace-nowrap shadow">
+          <div className="bg-brand text-white text-[11px] leading-tight rounded-lg px-2 py-1 whitespace-nowrap shadow">
             <span className="font-semibold">{formatCurrency(activeDay.deposits)}</span>
-            <span className="text-gray-400"> in · </span>
+            <span className="text-white/70"> in · </span>
             <span className="font-semibold">{formatCurrency(activeDay.outgoing)}</span>
-            <span className="text-gray-400"> out</span>
+            <span className="text-white/70"> out</span>
           </div>
         </div>
 
@@ -95,7 +95,7 @@ export default function WeeklyActivityChart({ week }: { week: WeekDay[] }) {
           <line x1={x(active)} x2={x(active)} y1={PAD_TOP - 4} y2={HEIGHT - PAD_BOTTOM} stroke="#d4d4d8" strokeWidth="1" strokeDasharray="3 3" vectorEffect="non-scaling-stroke" />
 
           <path d={smoothPath(outgoingPoints)} fill="none" stroke={OUTGOING_COLOR} strokeWidth="2" strokeDasharray="5 4" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-          <path d={smoothPath(depositPoints)} fill="none" stroke={DEPOSITS_COLOR} strokeWidth="2" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+          <path d={smoothPath(depositPoints)} fill="none" style={{ stroke: DEPOSITS_COLOR }} strokeWidth="2" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
 
           {/* Hit targets: one full-height column per day, wider than the marks */}
           {week.map((d, i) => (
@@ -146,7 +146,7 @@ export default function WeeklyActivityChart({ week }: { week: WeekDay[] }) {
             onFocus={() => setActive(i)}
             onClick={() => setActive(i)}
             className={`w-7 h-7 -mx-3.5 rounded-full text-xs font-medium transition-colors ${
-              i === active ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-900'
+              i === active ? 'bg-brand text-white' : 'text-gray-500 hover:text-brand'
             }`}
             title={d.fullLabel}
             aria-label={`${d.fullLabel}: ${formatCurrency(d.deposits)} deposited, ${formatCurrency(d.outgoing)} transferred or withdrawn`}

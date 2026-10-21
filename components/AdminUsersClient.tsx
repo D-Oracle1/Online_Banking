@@ -288,13 +288,13 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
               placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
         </div>
         <button
           onClick={() => setShowAddUser(true)}
-          className="flex items-center space-x-2 bg-gray-900 hover:bg-gray-700 text-white px-4 py-2 rounded-full transition-colors"
+          className="flex items-center space-x-2 bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-full transition-colors"
         >
           <UserPlus className="w-5 h-5" />
           <span>Add User</span>
@@ -355,24 +355,24 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-1">
-                        <span className={`inline-block px-2 py-1 text-xs font-semibold rounded w-fit ${user.role === 'admin' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800'}`}>
+                        <span className={`inline-block px-2 py-1 text-xs font-semibold rounded w-fit ${user.role === 'admin' ? 'bg-blue-100 text-blue-900' : 'bg-gray-100 text-gray-800'}`}>
                           {user.role}
                         </span>
                         {user.isManager && (
-                          <span className="inline-block px-2 py-1 text-xs font-semibold rounded bg-gray-100 text-gray-900 w-fit">
+                          <span className="inline-block px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-800 w-fit">
                             Manager
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500" suppressHydrationWarning>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" suppressHydrationWarning>
                       {format(new Date(user.createdAt), 'MMM dd, yyyy')}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => setSelectedUser(user)}
-                          className="text-gray-900 hover:text-gray-600"
+                          className="text-blue-600 hover:text-blue-800"
                           title="View Details"
                         >
                           <Eye className="w-5 h-5" />
@@ -385,7 +385,7 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
                             });
                             setShowResetPassword(true);
                           }}
-                          className="text-gray-900 hover:text-gray-600"
+                          className="text-blue-900 hover:text-blue-800"
                           title="Reset Password"
                         >
                           <KeyRound className="w-5 h-5" />
@@ -419,7 +419,7 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
                         {user.role !== 'admin' && !user.isSuperAdmin && (
                           <button
                             onClick={() => handleToggleManager(user)}
-                            className={`${user.isManager ? 'text-orange-500 hover:text-orange-700' : 'text-gray-700 hover:text-gray-600'}`}
+                            className={`${user.isManager ? 'text-orange-500 hover:text-orange-700' : 'text-blue-500 hover:text-blue-700'}`}
                             title={user.isManager ? 'Remove Manager Role' : 'Make Manager'}
                             disabled={isProcessing}
                           >
@@ -429,7 +429,7 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
                         {user.role !== 'admin' && !user.isSuperAdmin && (
                           <button
                             onClick={() => openAssignManager(user)}
-                            className="text-gray-700 hover:text-gray-600"
+                            className="text-blue-700 hover:text-blue-800"
                             title="Assign Manager"
                             disabled={isProcessing}
                           >
@@ -458,7 +458,7 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
       {showAddUser && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full">
-            <div className="bg-gray-900 text-white p-6 rounded-t-3xl">
+            <div className="bg-blue-900 text-white p-6 rounded-t-3xl">
               <h2 className="text-2xl font-bold">Add New User</h2>
             </div>
             <form onSubmit={handleAddUser} className="p-6 space-y-4">
@@ -518,7 +518,7 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
                 <button
                   type="submit"
                   disabled={isProcessing}
-                  className="flex-1 bg-gray-900 hover:bg-gray-700 text-white py-2 rounded-lg disabled:opacity-50"
+                  className="flex-1 bg-blue-900 hover:bg-blue-800 text-white py-2 rounded-lg disabled:opacity-50"
                 >
                   {isProcessing ? 'Creating...' : 'Create User'}
                 </button>
@@ -562,7 +562,7 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
               {/* Transaction Type */}
               <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200">
                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-gray-900 rounded-full"></span>
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
                   Transaction Type
                 </label>
                 <div className="grid grid-cols-2 gap-4">
@@ -594,7 +594,7 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
               {/* Amount */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-gray-900" />
+                  <DollarSign className="w-4 h-4 text-blue-600" />
                   Amount (USD)
                 </label>
                 <div className="relative">
@@ -606,7 +606,7 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
                     step="0.01"
                     value={balanceAdjustment.amount}
                     onChange={(e) => setBalanceAdjustment({ ...balanceAdjustment, amount: e.target.value })}
-                    className="w-full pl-12 pr-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all text-2xl font-bold"
+                    className="w-full pl-12 pr-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-2xl font-bold"
                     placeholder="0.00"
                   />
                 </div>
@@ -614,8 +614,8 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
 
               {/* Sender Details - Only for Credit/Deposit */}
               {balanceAdjustment.type === 'credit' && (
-                <div className="space-y-4 bg-gray-100 p-4 rounded-xl border border-gray-200">
-                  <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                <div className="space-y-4 bg-blue-50 p-4 rounded-xl border border-blue-200">
+                  <h3 className="font-semibold text-blue-900 flex items-center gap-2">
                     <span>👤</span> Sender Details
                   </h3>
 
@@ -628,7 +628,7 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
                       required
                       value={balanceAdjustment.senderName}
                       onChange={(e) => setBalanceAdjustment({ ...balanceAdjustment, senderName: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                       placeholder="Enter sender's full name"
                     />
                   </div>
@@ -642,7 +642,7 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
                       required
                       value={balanceAdjustment.senderAccount}
                       onChange={(e) => setBalanceAdjustment({ ...balanceAdjustment, senderAccount: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all font-mono"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono"
                       placeholder="Enter sender's account number"
                     />
                   </div>
@@ -656,7 +656,7 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
                       required
                       value={balanceAdjustment.senderBank}
                       onChange={(e) => setBalanceAdjustment({ ...balanceAdjustment, senderBank: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                       placeholder="Enter sender's bank name"
                     />
                   </div>
@@ -666,14 +666,14 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
               {/* Transaction Details */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                  <span className="w-4 h-4 text-gray-900">📝</span>
+                  <span className="w-4 h-4 text-blue-600">📝</span>
                   Transaction Reference / Note
                 </label>
                 <textarea
                   required
                   value={balanceAdjustment.description}
                   onChange={(e) => setBalanceAdjustment({ ...balanceAdjustment, description: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   rows={2}
                   placeholder={`Enter ${balanceAdjustment.type === 'credit' ? 'deposit' : 'withdrawal'} reference or note...`}
                 />
@@ -738,9 +738,9 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
       {showAssignManager && assignManagerTarget && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full">
-            <div className="bg-gray-900 text-white p-6 rounded-t-3xl">
+            <div className="bg-blue-900 text-white p-6 rounded-t-3xl">
               <h2 className="text-xl font-bold">Assign Manager</h2>
-              <p className="text-gray-400 text-sm mt-1">For: {assignManagerTarget.fullName}</p>
+              <p className="text-blue-200 text-sm mt-1">For: {assignManagerTarget.fullName}</p>
             </div>
             <form onSubmit={handleAssignManager} className="p-6 space-y-4">
               <div>
@@ -769,7 +769,7 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
                 <button
                   type="submit"
                   disabled={isProcessing}
-                  className="flex-1 bg-gray-900 hover:bg-gray-700 text-white py-2 rounded-lg disabled:opacity-50 font-semibold"
+                  className="flex-1 bg-blue-900 hover:bg-blue-800 text-white py-2 rounded-lg disabled:opacity-50 font-semibold"
                 >
                   {isProcessing ? 'Saving...' : 'Save Assignment'}
                 </button>
@@ -790,7 +790,7 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
       {showResetPassword && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full">
-            <div className="bg-gray-900 text-white p-6 rounded-t-3xl">
+            <div className="bg-blue-900 text-white p-6 rounded-t-3xl">
               <h2 className="text-2xl font-bold">Reset User Password</h2>
             </div>
             <form onSubmit={handleResetPassword} className="p-6 space-y-4">
@@ -807,7 +807,7 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
                   minLength={8}
                   value={passwordReset.newPassword}
                   onChange={(e) => setPasswordReset({ ...passwordReset, newPassword: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter new password (min 8 characters)"
                 />
               </div>
@@ -815,7 +815,7 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
                 <button
                   type="submit"
                   disabled={isProcessing}
-                  className="flex-1 bg-gray-900 hover:bg-gray-700 text-white py-2 rounded-lg disabled:opacity-50"
+                  className="flex-1 bg-blue-900 hover:bg-blue-800 text-white py-2 rounded-lg disabled:opacity-50"
                 >
                   {isProcessing ? 'Resetting...' : 'Reset Password'}
                 </button>

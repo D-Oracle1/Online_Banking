@@ -119,7 +119,7 @@ export default function AdminSidebar({ isSuperAdmin = false }: AdminSidebarProps
 
   const itemClass = (active: boolean, collapsed: boolean) =>
     `flex items-center ${collapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 rounded-full text-sm transition-colors ${
-      active ? 'bg-gray-900 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100'
+      active ? 'bg-brand text-white shadow-sm' : 'text-gray-700 hover:bg-brand-tint hover:text-brand'
     }`;
 
   const SidebarContent = ({ collapsed = false, showCloseButton = false }: { collapsed?: boolean; showCloseButton?: boolean }) => (
@@ -178,7 +178,7 @@ export default function AdminSidebar({ isSuperAdmin = false }: AdminSidebarProps
                     </span>
                     {!collapsed && badgeCount > 0 && (
                       <span className={`text-xs font-bold px-2 py-0.5 rounded-full min-w-[22px] text-center ${
-                        active ? 'bg-white text-gray-900' : 'bg-gray-900 text-white'
+                        active ? 'bg-white text-brand' : 'bg-brand text-white'
                       }`}>
                         {badgeCount > 99 ? '99+' : badgeCount}
                       </span>

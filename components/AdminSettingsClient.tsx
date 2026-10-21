@@ -190,7 +190,7 @@ export default function AdminSettingsClient() {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-900 border-t-transparent"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-900 border-t-transparent"></div>
           <p className="mt-4 text-gray-600">Loading settings...</p>
         </div>
       </div>
@@ -201,7 +201,7 @@ export default function AdminSettingsClient() {
     <div className="space-y-6">
       {/* Payment Methods */}
       <div className="bg-white rounded-3xl shadow-sm">
-        <div className="bg-gray-900 text-white p-6 rounded-t-3xl flex items-center">
+        <div className="bg-blue-900 text-white p-6 rounded-t-3xl flex items-center">
           <DollarSign className="w-6 h-6 mr-2" />
           <h2 className="text-xl font-bold">Payment Methods Configuration</h2>
         </div>
@@ -220,7 +220,7 @@ export default function AdminSettingsClient() {
                       btc: { ...paymentMethods.btc, enabled: e.target.checked },
                     })
                   }
-                  className="w-4 h-4 text-gray-900 rounded focus:ring-2 focus:ring-gray-900"
+                  className="w-4 h-4 text-blue-900 rounded focus:ring-2 focus:ring-blue-500"
                 />
                 <span className="ml-2 text-sm text-gray-700">Enabled</span>
               </label>
@@ -257,7 +257,7 @@ export default function AdminSettingsClient() {
                       eth: { ...paymentMethods.eth, enabled: e.target.checked },
                     })
                   }
-                  className="w-4 h-4 text-gray-900 rounded focus:ring-2 focus:ring-gray-900"
+                  className="w-4 h-4 text-blue-900 rounded focus:ring-2 focus:ring-blue-500"
                 />
                 <span className="ml-2 text-sm text-gray-700">Enabled</span>
               </label>
@@ -294,7 +294,7 @@ export default function AdminSettingsClient() {
                       usdt: { ...paymentMethods.usdt, enabled: e.target.checked },
                     })
                   }
-                  className="w-4 h-4 text-gray-900 rounded focus:ring-2 focus:ring-gray-900"
+                  className="w-4 h-4 text-blue-900 rounded focus:ring-2 focus:ring-blue-500"
                 />
                 <span className="ml-2 text-sm text-gray-700">Enabled</span>
               </label>
@@ -350,7 +350,7 @@ export default function AdminSettingsClient() {
                       bank: { ...paymentMethods.bank, enabled: e.target.checked },
                     })
                   }
-                  className="w-4 h-4 text-gray-900 rounded focus:ring-2 focus:ring-gray-900"
+                  className="w-4 h-4 text-blue-900 rounded focus:ring-2 focus:ring-blue-500"
                 />
                 <span className="ml-2 text-sm text-gray-700">Enabled</span>
               </label>
@@ -437,7 +437,7 @@ export default function AdminSettingsClient() {
                       cashapp: { ...paymentMethods.cashapp, enabled: e.target.checked },
                     })
                   }
-                  className="w-4 h-4 text-gray-900 rounded focus:ring-2 focus:ring-gray-900"
+                  className="w-4 h-4 text-blue-900 rounded focus:ring-2 focus:ring-blue-500"
                 />
                 <span className="ml-2 text-sm text-gray-700">Enabled</span>
               </label>
@@ -472,7 +472,7 @@ export default function AdminSettingsClient() {
                       paypal: { ...paymentMethods.paypal, enabled: e.target.checked },
                     })
                   }
-                  className="w-4 h-4 text-gray-900 rounded focus:ring-2 focus:ring-gray-900"
+                  className="w-4 h-4 text-blue-900 rounded focus:ring-2 focus:ring-blue-500"
                 />
                 <span className="ml-2 text-sm text-gray-700">Enabled</span>
               </label>
@@ -496,7 +496,7 @@ export default function AdminSettingsClient() {
           <button
             onClick={handleSavePaymentMethods}
             disabled={isProcessing}
-            className="w-full bg-gray-900 hover:bg-gray-700 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
+            className="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
           >
             <Save className="w-5 h-5" />
             <span>{isProcessing ? 'Saving...' : 'Save Payment Methods'}</span>
@@ -506,7 +506,7 @@ export default function AdminSettingsClient() {
 
       {/* Platform Settings */}
       <div className="bg-white rounded-3xl shadow-sm">
-        <div className="bg-gray-900 text-white p-6 rounded-t-3xl flex items-center">
+        <div className="bg-blue-900 text-white p-6 rounded-t-3xl flex items-center">
           <Settings className="w-6 h-6 mr-2" />
           <h2 className="text-xl font-bold">Platform Settings</h2>
         </div>
@@ -539,7 +539,7 @@ export default function AdminSettingsClient() {
                 onChange={(e) =>
                   setplatformSettings({ ...platformSettings, maintenanceMode: e.target.checked })
                 }
-                className="w-4 h-4 text-gray-900 rounded focus:ring-2 focus:ring-gray-900"
+                className="w-4 h-4 text-blue-900 rounded focus:ring-2 focus:ring-blue-500"
               />
               <span className="ml-2 text-sm text-gray-700">Enabled</span>
             </label>
@@ -560,7 +560,7 @@ export default function AdminSettingsClient() {
                     allowNewRegistrations: e.target.checked,
                   })
                 }
-                className="w-4 h-4 text-gray-900 rounded focus:ring-2 focus:ring-gray-900"
+                className="w-4 h-4 text-blue-900 rounded focus:ring-2 focus:ring-blue-500"
               />
               <span className="ml-2 text-sm text-gray-700">Enabled</span>
             </label>
@@ -581,7 +581,7 @@ export default function AdminSettingsClient() {
                     requireEmailVerification: e.target.checked,
                   })
                 }
-                className="w-4 h-4 text-gray-900 rounded focus:ring-2 focus:ring-gray-900"
+                className="w-4 h-4 text-blue-900 rounded focus:ring-2 focus:ring-blue-500"
               />
               <span className="ml-2 text-sm text-gray-700">Enabled</span>
             </label>
@@ -590,7 +590,7 @@ export default function AdminSettingsClient() {
           <button
             onClick={handleSavePlatformSettings}
             disabled={isProcessing}
-            className="w-full bg-gray-900 hover:bg-gray-700 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
+            className="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
           >
             <Save className="w-5 h-5" />
             <span>{isProcessing ? 'Saving...' : 'Save Platform Settings'}</span>
@@ -600,7 +600,7 @@ export default function AdminSettingsClient() {
 
       {/* Email Settings */}
       <div className="bg-white rounded-3xl shadow-sm">
-        <div className="bg-gray-900 text-white p-6 rounded-t-3xl flex items-center">
+        <div className="bg-blue-900 text-white p-6 rounded-t-3xl flex items-center">
           <Mail className="w-6 h-6 mr-2" />
           <h2 className="text-xl font-bold">Email Configuration</h2>
         </div>
@@ -667,7 +667,7 @@ export default function AdminSettingsClient() {
           <button
             onClick={handleSaveEmailSettings}
             disabled={isProcessing}
-            className="w-full bg-gray-900 hover:bg-gray-700 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
+            className="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
           >
             <Save className="w-5 h-5" />
             <span>{isProcessing ? 'Saving...' : 'Save Email Settings'}</span>

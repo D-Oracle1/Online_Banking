@@ -10,7 +10,7 @@ import AdminNotificationBadge from '@/components/AdminNotificationBadge';
 import WeeklyActivityChart from '@/components/admin/WeeklyActivityChart';
 
 const card = 'bg-white rounded-3xl p-5 md:p-6 shadow-sm';
-const darkCard = 'bg-[#1c1c1c] text-white rounded-3xl p-5 md:p-6 shadow-sm';
+const brandCard = 'bg-brand text-white rounded-3xl p-5 md:p-6 shadow-sm';
 
 const TYPE_LABELS: Record<string, string> = {
   DEPOSIT: 'Deposit',
@@ -22,7 +22,7 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 /** Small progress ring, like the ones on the design's cards */
-function Ring({ value, size = 28, stroke = 3, track = '#e4e4e7', color = '#111111', label }: {
+function Ring({ value, size = 28, stroke = 3, track = '#e4e4e7', color = 'var(--color-primary, #1e3a8a)', label }: {
   value: number; size?: number; stroke?: number; track?: string; color?: string; label?: string;
 }) {
   const r = (size - stroke) / 2;
@@ -87,14 +87,14 @@ export default function AdminDashboardView({ admin, data }: { admin: { fullName:
         <div className="flex items-center gap-2 md:gap-3">
           <Link
             href="/admin/users?create=1"
-            className="flex items-center gap-2 h-11 px-5 rounded-full bg-gray-900 text-white text-sm font-medium hover:bg-gray-700 transition-colors"
+            className="flex items-center gap-2 h-11 px-5 rounded-full bg-brand text-white text-sm font-medium hover:bg-brand-dark transition-colors"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Add user</span>
           </Link>
           <Link
             href="/admin/users"
-            className="w-11 h-11 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-900 hover:bg-gray-50"
+            className="w-11 h-11 rounded-full bg-white shadow-sm flex items-center justify-center text-brand hover:bg-brand-tint"
             title="Search users"
             aria-label="Search users"
           >
@@ -103,7 +103,7 @@ export default function AdminDashboardView({ admin, data }: { admin: { fullName:
           <AdminNotificationBadge />
           <Link
             href="/admin/settings"
-            className="w-11 h-11 rounded-full bg-gray-900 text-white flex items-center justify-center font-semibold"
+            className="w-11 h-11 rounded-full bg-brand text-white flex items-center justify-center font-semibold"
             title={admin.fullName}
           >
             {firstName.charAt(0).toUpperCase()}
@@ -114,10 +114,10 @@ export default function AdminDashboardView({ admin, data }: { admin: { fullName:
       {/* Row 1 */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {/* Overall information */}
-        <section className={`${darkCard} flex flex-col`}>
+        <section className={`${brandCard} flex flex-col`}>
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Overall information</h2>
-            <Link href="/admin/users" className="text-gray-400 hover:text-white" aria-label="Open Users Management">
+            <Link href="/admin/users" className="text-white/70 hover:text-white" aria-label="Open Users Management">
               <ArrowUpRight className="w-5 h-5" />
             </Link>
           </div>
@@ -125,36 +125,36 @@ export default function AdminDashboardView({ admin, data }: { admin: { fullName:
           <div className="flex items-end gap-6 mt-5">
             <div className="flex items-end gap-2">
               <span className="text-4xl md:text-5xl font-semibold leading-none">{data.customers}</span>
-              <span className="text-xs text-gray-400 leading-tight pb-1">customers<br />in total</span>
+              <span className="text-xs text-white/70 leading-tight pb-1">customers<br />in total</span>
             </div>
-            <div className="w-px h-10 bg-gray-700" />
+            <div className="w-px h-10 bg-white/25" />
             <div className="flex items-end gap-2">
               <span className="text-4xl md:text-5xl font-semibold leading-none">{data.pendingActivation}</span>
-              <span className="text-xs text-gray-400 leading-tight pb-1">accounts<br />awaiting activation</span>
+              <span className="text-xs text-white/70 leading-tight pb-1">accounts<br />awaiting activation</span>
             </div>
           </div>
 
           <div className="mt-4">
-            <div className="h-1.5 rounded-full bg-gray-700 overflow-hidden">
+            <div className="h-1.5 rounded-full bg-white/25 overflow-hidden">
               <div className="h-full rounded-full bg-white" style={{ width: `${Math.round(activationRate * 100)}%` }} />
             </div>
-            <p className="text-xs text-gray-400 mt-2">
+            <p className="text-xs text-white/70 mt-2">
               {formatCurrency(data.totalBalance)} held across {data.totalAccounts} account{data.totalAccounts === 1 ? '' : 's'}
             </p>
           </div>
 
           <div className="grid grid-cols-3 gap-2.5 mt-auto pt-5">
             {[
-              { value: data.activeAccounts, label: 'Active accounts', icon: UserCheck, href: '/admin/users', tone: 'bg-zinc-400 text-gray-900' },
-              { value: data.pendingDepositCount, label: 'Pending deposits', icon: Clock, href: '/admin/deposits', tone: 'bg-white text-gray-900' },
-              { value: data.pendingLoans, label: 'Pending loans', icon: FileText, href: '/admin/loans', tone: 'bg-white text-gray-900' },
+              { value: data.activeAccounts, label: 'Active accounts', icon: UserCheck, href: '/admin/users', tone: 'bg-white/20 text-white' },
+              { value: data.pendingDepositCount, label: 'Pending deposits', icon: Clock, href: '/admin/deposits', tone: 'bg-white text-brand' },
+              { value: data.pendingLoans, label: 'Pending loans', icon: FileText, href: '/admin/loans', tone: 'bg-white text-brand' },
             ].map(tile => (
               <Link key={tile.label} href={tile.href} className={`${tile.tone} rounded-2xl p-3 text-center hover:opacity-90 transition-opacity`}>
-                <span className="mx-auto w-7 h-7 rounded-full border border-gray-900/20 flex items-center justify-center">
+                <span className="mx-auto w-7 h-7 rounded-full border border-current flex items-center justify-center opacity-90">
                   <tile.icon className="w-3.5 h-3.5" />
                 </span>
                 <p className="text-2xl font-semibold mt-1.5">{tile.value}</p>
-                <p className="text-[11px] leading-tight text-gray-700">{tile.label}</p>
+                <p className="text-[11px] leading-tight opacity-80">{tile.label}</p>
               </Link>
             ))}
           </div>
@@ -191,7 +191,7 @@ export default function AdminDashboardView({ admin, data }: { admin: { fullName:
 
           <div className="flex items-center justify-between gap-4 my-5 flex-1">
             <ul className="space-y-3 text-sm text-gray-700">
-              <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-gray-900" />Active accounts</li>
+              <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-brand" />Active accounts</li>
               <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-zinc-300" />Awaiting activation</li>
               <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full border border-gray-400" />{data.newThisMonth} joined this month</li>
             </ul>
@@ -207,14 +207,14 @@ export default function AdminDashboardView({ admin, data }: { admin: { fullName:
           <div className="flex items-center gap-3">
             <Link
               href="/admin/users"
-              className="w-11 h-11 rounded-full bg-gray-900 text-white flex items-center justify-center hover:bg-gray-700"
+              className="w-11 h-11 rounded-full bg-brand text-white flex items-center justify-center hover:bg-brand-dark"
               aria-label="Open Users Management"
             >
               <Users className="w-4 h-4" />
             </Link>
             <Link
               href="/admin/transactions"
-              className="flex-1 flex items-center justify-center gap-2 h-11 rounded-full border border-gray-900 text-sm font-medium text-gray-900 hover:bg-gray-50"
+              className="flex-1 flex items-center justify-center gap-2 h-11 rounded-full border border-brand text-sm font-medium text-brand hover:bg-brand-tint"
             >
               View transactions
               <ArrowDownToLine className="w-4 h-4" />
@@ -236,7 +236,7 @@ export default function AdminDashboardView({ admin, data }: { admin: { fullName:
               <li key={t.href}>
                 <Link href={t.href} className="flex items-center gap-3 text-sm group">
                   {t.count === 0 ? (
-                    <CheckSquare className="w-5 h-5 text-gray-900 flex-shrink-0" />
+                    <CheckSquare className="w-5 h-5 text-brand flex-shrink-0" />
                   ) : (
                     <Square className="w-5 h-5 text-gray-300 flex-shrink-0" />
                   )}
@@ -265,7 +265,7 @@ export default function AdminDashboardView({ admin, data }: { admin: { fullName:
                 className="relative bg-white rounded-3xl p-5 shadow-sm flex flex-col min-h-[170px] hover:shadow-md transition-shadow overflow-hidden"
               >
                 <div className="flex items-start justify-between">
-                  <Banknote className="w-6 h-6 text-gray-900" />
+                  <Banknote className="w-6 h-6 text-brand" />
                   <MoreHorizontal className="w-5 h-5 text-gray-400" />
                 </div>
                 <p className="mt-4 font-semibold text-gray-900 leading-snug">
@@ -274,18 +274,18 @@ export default function AdminDashboardView({ admin, data }: { admin: { fullName:
                 <p className="text-xs text-gray-500 mt-1 capitalize">via {deposit.paymentMethod.replace(/_/g, ' ').toLowerCase()}</p>
                 <p className="text-xs text-gray-400 mt-auto pt-3">{format(new Date(deposit.createdAt), 'dd.MM.yyyy')}</p>
                 {index === 0 ? (
-                  <span className="absolute bottom-0 right-0 w-12 h-12 bg-gray-900 text-white rounded-tl-2xl flex items-center justify-center">
+                  <span className="absolute bottom-0 right-0 w-12 h-12 bg-brand text-white rounded-tl-2xl flex items-center justify-center">
                     <Bell className="w-4 h-4" />
                   </span>
                 ) : (
-                  <Bell className="absolute bottom-5 right-5 w-4 h-4 text-gray-900" />
+                  <Bell className="absolute bottom-5 right-5 w-4 h-4 text-brand" />
                 )}
               </Link>
             ))}
 
             <Link
               href="/admin/deposits"
-              className={`rounded-3xl border-2 border-dashed border-gray-400 flex items-center justify-center gap-2 min-h-[170px] text-sm font-medium text-gray-700 hover:bg-white/50 transition-colors ${
+              className={`rounded-3xl border-2 border-dashed border-brand flex items-center justify-center gap-2 min-h-[170px] text-sm font-medium text-gray-700 hover:bg-white/50 transition-colors ${
                 data.latestPendingDeposits.length === 0 ? 'sm:col-span-3' : data.latestPendingDeposits.length === 1 ? 'sm:col-span-2' : ''
               }`}
             >
@@ -317,19 +317,19 @@ export default function AdminDashboardView({ admin, data }: { admin: { fullName:
             {data.recentTransactions.map(t => {
               const incoming = t.type === 'DEPOSIT' || t.type === 'CREDIT';
               return (
-                <Link key={t.id} href="/admin/transactions" className={`${darkCard} hover:bg-black transition-colors`}>
+                <Link key={t.id} href="/admin/transactions" className={`${brandCard} hover:bg-brand-dark transition-colors`}>
                   <div className="flex items-start justify-between gap-3">
                     <p className="font-semibold leading-snug line-clamp-1">{t.description || TYPE_LABELS[t.type] || t.type}</p>
-                    <span className="w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center flex-shrink-0">
+                    <span className="w-8 h-8 rounded-full border border-white/40 flex items-center justify-center flex-shrink-0">
                       {incoming ? <ArrowDownLeft className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
                     </span>
                   </div>
-                  <p className="flex items-center gap-2 text-xs text-gray-400 mt-1">
-                    <span className={`w-1.5 h-1.5 rounded-full ${t.status === 'SUCCESS' ? 'bg-white' : 'bg-gray-500'}`} />
+                  <p className="flex items-center gap-2 text-xs text-white/70 mt-1">
+                    <span className={`w-1.5 h-1.5 rounded-full ${t.status === 'SUCCESS' ? 'bg-white' : 'bg-white/40'}`} />
                     {t.status === 'SUCCESS' ? 'Completed' : t.status.charAt(0) + t.status.slice(1).toLowerCase()}
                   </p>
                   <p className="text-2xl font-semibold mt-4">{formatCurrency(t.amount)}</p>
-                  <p className="text-xs text-gray-400 mt-1 truncate">
+                  <p className="text-xs text-white/70 mt-1 truncate">
                     {TYPE_LABELS[t.type] || t.type} · {t.userName || 'Unknown customer'} · {format(new Date(t.createdAt), 'dd.MM.yyyy')}
                   </p>
                 </Link>

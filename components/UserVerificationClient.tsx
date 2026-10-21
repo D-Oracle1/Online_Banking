@@ -129,7 +129,7 @@ export default function UserVerificationClient({ users: initialUsers }: { users:
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex gap-2">
                       {user.profilePhoto && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-900">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                           Photo
                         </span>
                       )}
@@ -155,7 +155,7 @@ export default function UserVerificationClient({ users: initialUsers }: { users:
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleViewDetails(user)}
-                        className="text-gray-900 hover:text-gray-600 flex items-center gap-1"
+                        className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
                       >
                         <Eye className="w-4 h-4" />
                         View
