@@ -12,12 +12,15 @@ interface Notifications {
 }
 
 interface AdminNotificationBadgeProps {
-  /** 'sidebar': light icon on the dark sidebar, dropdown opens to the right */
-  variant?: 'header' | 'sidebar';
+  /**
+   * 'circle': round white button for a page's top row, dropdown under it on the right.
+   * 'light': plain icon for the mobile menu drawer, dropdown pinned across the screen.
+   */
+  variant?: 'circle' | 'light';
 }
 
-export default function AdminNotificationBadge({ variant = 'header' }: AdminNotificationBadgeProps) {
-  const inSidebar = variant === 'sidebar';
+export default function AdminNotificationBadge({ variant = 'circle' }: AdminNotificationBadgeProps) {
+  const isCircle = variant === 'circle';
   const [notifications, setNotifications] = useState<Notifications>({
     pendingDeposits: 0,
     pendingLoans: 0,
@@ -49,13 +52,15 @@ export default function AdminNotificationBadge({ variant = 'header' }: AdminNoti
     <div className="relative">
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        className={`relative p-2 rounded-lg transition-colors ${
-          inSidebar ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+        className={`relative transition-colors ${
+          isCircle
+            ? 'w-11 h-11 rounded-full bg-white shadow-sm text-gray-900 hover:bg-gray-50 flex items-center justify-center'
+            : 'p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100'
         }`}
         title="Notifications"
         aria-label="Notifications"
       >
-        <Bell className={inSidebar ? 'w-5 h-5' : 'w-6 h-6'} />
+        <Bell className="w-5 h-5" />
         {notifications.total > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
             {notifications.total > 9 ? '9+' : notifications.total}
@@ -73,12 +78,12 @@ export default function AdminNotificationBadge({ variant = 'header' }: AdminNoti
           ></div>
 
           {/* Dropdown Content */}
-          <div className={`absolute mt-2 bg-white rounded-xl shadow-lg border border-gray-200 z-20 overflow-hidden text-left ${
-            inSidebar ? 'left-0 w-72 max-w-[calc(100vw-2rem)]' : 'right-0 w-[calc(100vw-1rem)] max-w-sm md:w-80'
+          <div className={`bg-white rounded-2xl shadow-lg border border-gray-200 z-20 overflow-hidden text-left ${
+            isCircle ? 'absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)]' : 'fixed left-4 right-4 top-20 max-w-sm'
           }`}>
-            <div className="bg-blue-900 text-white px-3 py-2.5 md:px-4 md:py-3">
+            <div className="bg-gray-900 text-white px-3 py-2.5 md:px-4 md:py-3">
               <h3 className="font-semibold text-sm md:text-base">Notifications</h3>
-              <p className="text-xs text-blue-200">
+              <p className="text-xs text-gray-400">
                 {notifications.total} pending item{notifications.total !== 1 ? 's' : ''}
               </p>
             </div>
@@ -160,7 +165,7 @@ export default function AdminNotificationBadge({ variant = 'header' }: AdminNoti
                     setShowDropdown(false);
                     fetchNotifications();
                   }}
-                  className="text-xs text-blue-900 hover:text-blue-700 font-medium active:text-blue-800"
+                  className="text-xs text-gray-900 hover:text-gray-600 font-medium"
                 >
                   Refresh Notifications
                 </button>

@@ -32,6 +32,11 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showAddUser, setShowAddUser] = useState(false);
+
+  // The dashboard's "Add user" button links here with ?create=1
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('create') === '1') setShowAddUser(true);
+  }, []);
   const [showAdjustBalance, setShowAdjustBalance] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
