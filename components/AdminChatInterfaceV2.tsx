@@ -401,7 +401,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
   return (
     <div className={`flex ${
       fullScreen
-        ? 'h-screen'
+        ? 'h-screen lg:h-[calc(100vh-2rem)] lg:rounded-3xl lg:shadow-sm overflow-hidden'
         : 'h-[calc(100vh-10rem)] md:h-[calc(100vh-8rem)] min-h-[500px] rounded-lg shadow-lg border'
     } ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'}`}>
       {/* Left Sidebar - Conversations List */}

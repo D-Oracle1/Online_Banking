@@ -26,7 +26,9 @@ export default async function AdminLayout({
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* No top header: page actions flow with each page, logout lives in the sidebar.
             Extra top padding below lg keeps content clear of the floating menu button. */}
-        <main className="admin-content flex-1 overflow-y-auto p-3 pt-16 md:p-6 md:pt-16 lg:pt-6">
+        {/* On desktop the content gets the same 1rem frame as the floating sidebar on every side */}
+        <main className="admin-content flex-1 overflow-y-auto p-3 pt-16 md:p-6 md:pt-16 lg:p-4">
+
           {children}
         </main>
       </div>

@@ -80,7 +80,7 @@ export default function AdminDashboardView({ admin, data }: { admin: { fullName:
   const todosDone = todos.filter(t => t.count === 0).length;
 
   return (
-    <div className="space-y-6 max-w-[1400px]">
+    <div className="space-y-6">
       {/* Greeting with page actions (not a fixed header) */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Hi, {firstName}!</h1>

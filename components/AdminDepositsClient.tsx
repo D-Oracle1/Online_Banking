@@ -104,7 +104,7 @@ export default function AdminDepositsClient({ deposits: initialDeposits }: Admin
     <div className="space-y-6">
       {/* Filter Tabs */}
       <div className="bg-white rounded-3xl shadow-sm p-4">
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-2">
           {['ALL', 'PENDING', 'APPROVED', 'REJECTED'].map((status) => (
             <button
               key={status}
@@ -241,6 +241,7 @@ export default function AdminDepositsClient({ deposits: initialDeposits }: Admin
               <h2 className="text-2xl font-bold">Deposit Details</h2>
               <button
                 onClick={() => setSelectedDeposit(null)}
+                aria-label="Close"
                 className="hover:bg-white/10 rounded-full p-1"
               >
                 <X className="w-6 h-6" />

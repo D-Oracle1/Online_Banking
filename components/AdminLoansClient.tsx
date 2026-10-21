@@ -161,7 +161,7 @@ export default function AdminLoansClient({ loans: initialLoans }: AdminLoansClie
 
       {/* Filter Tabs */}
       <div className="bg-white rounded-3xl shadow-sm p-4">
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-2">
           {['ALL', 'PENDING', 'APPROVED', 'REJECTED'].map((status) => (
             <button
               key={status}
@@ -302,6 +302,7 @@ export default function AdminLoansClient({ loans: initialLoans }: AdminLoansClie
               <h2 className="text-2xl font-bold">Loan Application Details</h2>
               <button
                 onClick={() => setSelectedLoan(null)}
+                aria-label="Close"
                 className="hover:bg-white/10 rounded-full p-1"
               >
                 <X className="w-6 h-6" />
