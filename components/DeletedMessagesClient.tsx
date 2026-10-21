@@ -24,7 +24,9 @@ interface DeletedMessagesClientProps {
 }
 
 interface ConversationGroup {
-  userId: string;
+  key: string;
+  /** Every sender ID in this chat (same person across guest sessions / account) */
+  memberIds: string[];
   userName: string;
   userEmail: string | null;
   isGuest: boolean;
@@ -43,20 +45,31 @@ export default function DeletedMessagesClient({ messages: initialMessages, limit
 
   useEffect(() => setMounted(true), []);
 
+  // One entry per person, matching the chat inbox: same name = same chat
   const groups = useMemo(() => {
     const byUser = new Map<string, ConversationGroup>();
     for (const msg of messages) {
-      let group = byUser.get(msg.userId);
+      const name = msg.userName.trim().replace(/\s+/g, ' ').toLowerCase();
+      const key = name && name !== 'guest user' ? `name:${name}` : `id:${msg.userId}`;
+      let group = byUser.get(key);
       if (!group) {
         group = {
-          userId: msg.userId,
+          key,
+          memberIds: [],
           userName: msg.userName,
           userEmail: msg.userEmail,
           isGuest: msg.isGuest,
           lastDeletedAt: msg.deletedAt,
           messages: [],
         };
-        byUser.set(msg.userId, group);
+        byUser.set(key, group);
+      }
+      if (!group.memberIds.includes(msg.userId)) group.memberIds.push(msg.userId);
+      // Prefer a registered account's details over a guest's
+      if (group.isGuest && !msg.isGuest) {
+        group.userName = msg.userName;
+        group.userEmail = msg.userEmail;
+        group.isGuest = false;
       }
       group.messages.push(msg);
     }
@@ -95,10 +108,10 @@ export default function DeletedMessagesClient({ messages: initialMessages, limit
     return data;
   };
 
-  const handleRestore = async (ids: string[], key: string, userId?: string) => {
+  const handleRestore = async (ids: string[], key: string, userIds?: string[]) => {
     setProcessingKey(key);
     try {
-      await callApi('/api/admin/restore/message', userId ? { userId } : { messageIds: ids });
+      await callApi('/api/admin/restore/message', userIds ? { userIds } : { messageIds: ids });
       removeFromList(ids);
     } catch (error: any) {
       alert(error.message || 'Failed to restore');
@@ -107,12 +120,12 @@ export default function DeletedMessagesClient({ messages: initialMessages, limit
     }
   };
 
-  const handlePermanentDelete = async (ids: string[], key: string, label: string, userId?: string) => {
+  const handlePermanentDelete = async (ids: string[], key: string, label: string, userIds?: string[]) => {
     if (!confirm(`Permanently delete ${label}? This cannot be undone.`)) return;
 
     setProcessingKey(key);
     try {
-      await callApi('/api/admin/messages/permanent-delete', userId ? { userId } : { messageIds: ids });
+      await callApi('/api/admin/messages/permanent-delete', userIds ? { userIds } : { messageIds: ids });
       removeFromList(ids);
     } catch (error: any) {
       alert(error.message || 'Failed to delete');
@@ -151,15 +164,15 @@ export default function DeletedMessagesClient({ messages: initialMessages, limit
         <div className="space-y-3">
           {filteredGroups.map(group => {
             const ids = group.messages.map(m => m.id);
-            const isOpen = expanded === group.userId;
-            const groupKey = `group-${group.userId}`;
+            const isOpen = expanded === group.key;
+            const groupKey = `group-${group.key}`;
             const count = group.messages.length;
 
             return (
-              <div key={group.userId} className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+              <div key={group.key} className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
                 <div className="p-4 flex flex-col md:flex-row md:items-center gap-3">
                   <button
-                    onClick={() => setExpanded(isOpen ? null : group.userId)}
+                    onClick={() => setExpanded(isOpen ? null : group.key)}
                     className="flex-1 min-w-0 flex items-center gap-3 text-left"
                   >
                     <div className="w-10 h-10 flex-shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold">
@@ -180,7 +193,7 @@ export default function DeletedMessagesClient({ messages: initialMessages, limit
 
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <button
-                      onClick={() => handleRestore(ids, groupKey, group.userId)}
+                      onClick={() => handleRestore(ids, groupKey, group.memberIds)}
                       disabled={processingKey !== null}
                       className="flex items-center gap-1 px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
                     >
@@ -188,7 +201,7 @@ export default function DeletedMessagesClient({ messages: initialMessages, limit
                       {processingKey === groupKey ? 'Working…' : count === 1 ? 'Restore' : 'Restore all'}
                     </button>
                     <button
-                      onClick={() => handlePermanentDelete(ids, groupKey, `${count} message${count === 1 ? '' : 's'} from ${group.userName}`, group.userId)}
+                      onClick={() => handlePermanentDelete(ids, groupKey, `${count} message${count === 1 ? '' : 's'} from ${group.userName}`, group.memberIds)}
                       disabled={processingKey !== null}
                       className="flex items-center gap-1 px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
                     >

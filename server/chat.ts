@@ -1,6 +1,6 @@
 import { db } from './db';
 import { messages, users } from '@shared/schema';
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 
 /**
  * Chat images and profile photos are stored as base64 data URLs. Sending them
@@ -41,8 +41,15 @@ export function imageResponse(value: string | null, cacheControl: string) {
   });
 }
 
-/** Messages for one conversation, with attachments replaced by URLs */
-export async function getConversationMessages(userId: string, guestId?: string) {
+/**
+ * Messages for one conversation, with attachments replaced by URLs.
+ * Pass several IDs to get one combined, time-ordered chat for a person who
+ * wrote in under more than one ID (e.g. several guest sessions).
+ */
+export async function getConversationMessages(userId: string | string[], guestId?: string) {
+  const userIds = Array.isArray(userId) ? userId : [userId];
+  if (userIds.length === 0) return [];
+
   const rows = await db
     .select({
       id: messages.id,
@@ -56,7 +63,7 @@ export async function getConversationMessages(userId: string, guestId?: string) 
       createdAt: messages.createdAt,
     })
     .from(messages)
-    .where(and(eq(messages.userId, userId), isNull(messages.deletedAt)))
+    .where(and(inArray(messages.userId, userIds), isNull(messages.deletedAt)))
     .orderBy(messages.createdAt);
 
   return rows.map(({ hasAttachment, ...row }) => ({
@@ -67,7 +74,12 @@ export async function getConversationMessages(userId: string, guestId?: string) 
 
 export interface Conversation {
   user: {
+    /** Where replies go: the ID the person most recently wrote from */
     id: string;
+    /** Stable identifier for the chat, even as new sender IDs join it */
+    key: string;
+    /** Every sender ID whose messages belong to this chat */
+    memberIds: string[];
     fullName: string;
     email: string | null;
     username: string;
@@ -158,6 +170,8 @@ export async function getConversations(managerId?: string) {
     return {
       user: {
         id: row.user_id,
+        key: `id:${row.user_id}`,
+        memberIds: [row.user_id],
         fullName: isGuest ? (row.guest_name || 'Guest User') : row.full_name!,
         email: row.email || null,
         username: isGuest ? 'Guest User' : row.username!,
@@ -182,6 +196,8 @@ export async function getConversations(managerId?: string) {
         conversations.push({
           user: {
             id: u.id,
+            key: `id:${u.id}`,
+            memberIds: [u.id],
             fullName: u.fullName,
             email: u.email,
             username: u.username,
@@ -194,5 +210,56 @@ export async function getConversations(managerId?: string) {
     }
   }
 
-  return conversations;
+  return mergeConversationsByName(conversations);
+}
+
+const GUEST_USERNAME = 'Guest User';
+
+/** Same name regardless of capitals or extra spaces */
+export function normalizeSenderName(name: string | null | undefined) {
+  return (name || '').trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+/**
+ * One chat per person, like WhatsApp: conversations whose sender has the same
+ * name are combined, whether they wrote as a guest (a new ID per browser
+ * session) or as a registered user. Unnamed guests are never merged.
+ */
+function mergeConversationsByName(perSender: Conversation[]): Conversation[] {
+  const groups = new Map<string, Conversation>();
+
+  for (const conv of perSender) {
+    const name = normalizeSenderName(conv.user.fullName);
+    const key = name && name !== normalizeSenderName(GUEST_USERNAME) ? `name:${name}` : conv.user.key;
+    const existing = groups.get(key);
+
+    if (!existing) {
+      groups.set(key, { ...conv, user: { ...conv.user, key, memberIds: [...conv.user.memberIds] } });
+      continue;
+    }
+
+    existing.user.memberIds.push(...conv.user.memberIds);
+    existing.unreadCount += conv.unreadCount;
+
+    // Newest message decides the preview and where replies go
+    if (conv.lastMessage && (!existing.lastMessage || new Date(conv.lastMessage.createdAt) > new Date(existing.lastMessage.createdAt))) {
+      existing.lastMessage = conv.lastMessage;
+      existing.user.id = conv.user.id;
+    }
+
+    // Prefer a registered account's profile details over a guest's
+    if (existing.user.username === GUEST_USERNAME && conv.user.username !== GUEST_USERNAME) {
+      existing.user.fullName = conv.user.fullName;
+      existing.user.email = conv.user.email;
+      existing.user.username = conv.user.username;
+      existing.user.profilePhoto = conv.user.profilePhoto;
+    }
+  }
+
+  return [...groups.values()].sort((a, b) => {
+    if (!a.lastMessage && !b.lastMessage) return 0;
+    if (!a.lastMessage) return 1;
+    if (!b.lastMessage) return -1;
+    return new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime();
+  });
 }

@@ -5,7 +5,12 @@ import { Search, Send, MessageSquare, User as UserIcon, Paperclip, X, Image as I
 import { format } from 'date-fns';
 
 interface User {
+  /** Where replies go: the ID the person most recently wrote from */
   id: string;
+  /** Stable chat identifier; one chat per person even across several sender IDs */
+  key: string;
+  /** Every sender ID whose messages are shown in this chat */
+  memberIds: string[];
   fullName: string;
   email: string | null;
   username: string;
@@ -43,7 +48,10 @@ interface AdminChatInterfaceProps {
 
 export default function AdminChatInterfaceV2({ conversations: initialConversations, adminId, canSend = true, canDelete = true }: AdminChatInterfaceProps) {
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  // Read from the live list so a person's new sender IDs join the open chat
+  const selectedConversation = selectedKey ? conversations.find(c => c.user.key === selectedKey) ?? null : null;
+  const selectedUser = selectedConversation?.user ?? null;
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
@@ -55,9 +63,29 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const selectedUserIdRef = useRef<string | null>(null);
+  const selectedKeyRef = useRef<string | null>(null);
+  const selectedMemberIdsRef = useRef<string[]>([]);
+  const selectedReplyIdRef = useRef<string | null>(null);
+  const selectedUnreadRef = useRef(0);
 
   const lastMessageCountRef = useRef(0);
+
+  // Latest selection for the polling loop, without restarting it
+  selectedKeyRef.current = selectedKey;
+  selectedMemberIdsRef.current = selectedUser?.memberIds ?? [];
+  selectedReplyIdRef.current = selectedUser?.id ?? null;
+  selectedUnreadRef.current = selectedConversation?.unreadCount ?? 0;
+
+  const memberQuery = (ids: string[]) => `userIds=${ids.map(encodeURIComponent).join(',')}`;
+
+  const markRead = (ids: string[]) =>
+    fetch('/api/admin/chat/mark-read', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userIds: ids }),
+    }).catch(err => {
+      console.error('Error marking messages as read:', err);
+    });
 
   const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
     messagesEndRef.current?.scrollIntoView({ behavior });
@@ -66,25 +94,20 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
   // Only scroll when messages are added, so polling doesn't yank the view
   // back down while reading older messages
   useEffect(() => {
-    if (!selectedUser) return;
+    if (!selectedKey) return;
     if (messages.length > lastMessageCountRef.current) {
       scrollToBottom(lastMessageCountRef.current === 0 ? 'auto' : 'smooth');
     }
     lastMessageCountRef.current = messages.length;
-  }, [messages, selectedUser]);
+  }, [messages, selectedKey]);
 
   useEffect(() => {
     lastMessageCountRef.current = 0;
-  }, [selectedUser]);
+  }, [selectedKey]);
 
-  // Update ref whenever selectedUser changes
+  // Load messages when a chat is selected
   useEffect(() => {
-    selectedUserIdRef.current = selectedUser?.id || null;
-  }, [selectedUser]);
-
-  // Load messages when user is selected
-  useEffect(() => {
-    if (!selectedUser) {
+    if (!selectedKey) {
       setMessages([]);
       setIsLoadingMessages(false);
       return;
@@ -94,12 +117,12 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
     setMessages([]);
 
     const controller = new AbortController();
-    loadMessages(selectedUser.id, controller.signal);
+    loadMessages(selectedKey, selectedMemberIdsRef.current, controller.signal);
 
     return () => {
       controller.abort();
     };
-  }, [selectedUser]);
+  }, [selectedKey]);
 
   // Auto-refresh. Each poll waits for the previous one to finish so slow
   // responses can't pile up, and polling pauses while the tab is hidden.
@@ -111,16 +134,18 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
 
     const refreshData = async () => {
       try {
-        // Store current user ID at start of request
-        const currentUserId = selectedUserIdRef.current;
+        // Store current chat at start of request
+        const currentKey = selectedKeyRef.current;
+        const memberIds = selectedMemberIdsRef.current;
+        const replyId = selectedReplyIdRef.current;
 
         const [convResponse, msgResponse, statusResponse] = await Promise.all([
           fetch('/api/admin/chat/conversations', { signal: controller.signal }),
-          currentUserId
-            ? fetch(`/api/admin/chat/messages?userId=${currentUserId}`, { signal: controller.signal })
+          currentKey && memberIds.length
+            ? fetch(`/api/admin/chat/messages?${memberQuery(memberIds)}`, { signal: controller.signal })
             : null,
-          currentUserId
-            ? fetch(`/api/admin/chat/user-status?userId=${currentUserId}`, { signal: controller.signal })
+          currentKey && replyId
+            ? fetch(`/api/admin/chat/user-status?userId=${encodeURIComponent(replyId)}`, { signal: controller.signal })
             : null,
         ]);
 
@@ -129,8 +154,13 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
           setConversations(prev => sameJson(prev, data.conversations) ? prev : data.conversations);
         }
 
-        // Only update if user hasn't changed
-        if (currentUserId && selectedUserIdRef.current === currentUserId) {
+        // New messages arriving in the open chat count as read
+        if (currentKey && selectedKeyRef.current === currentKey && selectedUnreadRef.current > 0) {
+          markRead(selectedMemberIdsRef.current);
+        }
+
+        // Only update if the chat hasn't changed
+        if (currentKey && selectedKeyRef.current === currentKey) {
           if (msgResponse?.ok) {
             const data = await msgResponse.json();
             setMessages(prev => {
@@ -178,32 +208,29 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       controller.abort();
     };
-  }, [selectedUser]);
+  }, [selectedKey]);
 
-  const loadMessages = async (userId: string, signal?: AbortSignal) => {
+  const loadMessages = async (key: string, memberIds: string[], signal?: AbortSignal) => {
+    if (!memberIds.length) return;
     setIsLoadingMessages(true);
     try {
-      const response = await fetch(`/api/admin/chat/messages?userId=${userId}`, {
+      const response = await fetch(`/api/admin/chat/messages?${memberQuery(memberIds)}`, {
         signal
       });
 
       if (response.ok) {
         const data = await response.json();
 
-        // Only update if this is still the selected user
-        if (selectedUserIdRef.current === userId) {
+        // Only update if this is still the selected chat
+        if (selectedKeyRef.current === key) {
           setMessages(data.messages);
           setIsLoadingMessages(false);
 
           // Mark as read (don't pass signal as this should complete)
-          await fetch('/api/admin/chat/mark-read', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId }),
-          }).catch(err => {
-            console.error('Error marking messages as read:', err);
-          });
+          await markRead(memberIds);
         }
+      } else {
+        setIsLoadingMessages(false);
       }
     } catch (error: any) {
       if (error.name !== 'AbortError') {
@@ -343,13 +370,13 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
       const response = await fetch('/api/admin/chat/delete-conversation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: selectedUser.id }),
+        body: JSON.stringify({ userIds: selectedUser.memberIds }),
       });
 
       if (response.ok) {
         setMessages([]);
-        setConversations(conversations.filter(conv => conv.user.id !== selectedUser.id));
-        setSelectedUser(null);
+        setConversations(prev => prev.filter(conv => conv.user.key !== selectedUser.key));
+        setSelectedKey(null);
       } else {
         alert('Failed to delete conversation');
       }
@@ -412,10 +439,10 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
           ) : (
             filteredConversations.map((conv) => (
               <div
-                key={conv.user.id}
-                onClick={() => setSelectedUser(conv.user)}
+                key={conv.user.key}
+                onClick={() => setSelectedKey(conv.user.key)}
                 className={`p-2.5 border-b cursor-pointer transition-colors ${
-                  selectedUser?.id === conv.user.id
+                  selectedKey === conv.user.key
                     ? darkMode ? 'bg-gray-800 border-l-4 border-l-blue-500' : 'bg-blue-50 border-l-4 border-l-blue-600'
                     : darkMode ? 'border-gray-800 hover:bg-gray-800' : 'border-gray-100 hover:bg-gray-50'
                 }`}
@@ -486,7 +513,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
             <div className={`p-2.5 border-b flex items-center flex-shrink-0 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gradient-to-r from-blue-900 to-blue-800 border-gray-200'}`}>
               {/* Back Button - Mobile Only */}
               <button
-                onClick={() => setSelectedUser(null)}
+                onClick={() => setSelectedKey(null)}
                 className={`md:hidden mr-2 p-1.5 rounded-lg transition-colors ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-blue-700'}`}
               >
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

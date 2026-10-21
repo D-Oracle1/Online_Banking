@@ -155,6 +155,35 @@ export async function canAccessClient(staff: StaffContext, clientId: string) {
 }
 
 /**
+ * Sender IDs for a chat request: `userIds` (array or comma-separated) for a
+ * merged chat, or a single `userId`. Returns a de-duplicated list.
+ */
+export function parseClientIds(input: { userId?: unknown; userIds?: unknown }): string[] {
+  const raw = Array.isArray(input.userIds)
+    ? input.userIds
+    : typeof input.userIds === 'string'
+      ? input.userIds.split(',')
+      : [input.userId];
+  return [...new Set(raw.filter((id): id is string => typeof id === 'string' && id.trim() !== '').map(id => id.trim()))];
+}
+
+/** Like requireStaffPermission, but every client in the list must be accessible */
+export async function requireStaffPermissionForClients(
+  permission: ManagerPermissionKey,
+  clientIds: string[]
+): Promise<StaffContext | { error: string; status: number }> {
+  const staff = await requireStaffPermission(permission);
+  if ('error' in staff) return staff;
+
+  for (const clientId of clientIds) {
+    if (!(await canAccessClient(staff, clientId))) {
+      return { error: 'This client is not assigned to you', status: 403 };
+    }
+  }
+  return staff;
+}
+
+/**
  * Gate for chat API routes. Returns the staff context, or an error
  * { error, status } when the viewer lacks the permission or the client isn't theirs.
  */

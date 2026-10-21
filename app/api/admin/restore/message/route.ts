@@ -2,23 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminAuth } from '@/lib/session';
 import { db } from '@/server/db';
 import { messages } from '@/shared/schema';
-import { and, eq, inArray, isNotNull } from 'drizzle-orm';
+import { and, inArray, isNotNull } from 'drizzle-orm';
+import { parseClientIds } from '@/lib/manager-permissions';
 import { logRestore, logBulkRestore } from '@/server/audit-logger';
 
 /**
  * Restore soft-deleted messages.
  * Body: { messageId } for one message, { messageIds } for several,
- * or { userId } for every deleted message in that conversation.
+ * or { userId } / { userIds } for every deleted message in that conversation.
  */
 export async function POST(request: NextRequest) {
   try {
     const session = await requireAdminAuth();
 
-    const { messageId, messageIds, userId } = await request.json();
+    const body = await request.json();
+    const { messageId, messageIds } = body;
 
     const ids: string[] = messageIds ?? (messageId ? [messageId] : []);
+    const userIds = body.userId || body.userIds ? parseClientIds(body) : [];
 
-    if (!ids.length && !userId) {
+    if (!ids.length && !userIds.length) {
       return NextResponse.json({ error: 'Message ID or user ID is required' }, { status: 400 });
     }
 
@@ -26,7 +29,7 @@ export async function POST(request: NextRequest) {
       .set({ deletedAt: null, deletedBy: null })
       .where(and(
         isNotNull(messages.deletedAt),
-        userId ? eq(messages.userId, userId) : inArray(messages.id, ids)
+        userIds.length ? inArray(messages.userId, userIds) : inArray(messages.id, ids)
       ))
       .returning({ id: messages.id });
 

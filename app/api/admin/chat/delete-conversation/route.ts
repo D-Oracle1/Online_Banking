@@ -1,25 +1,26 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/server/db';
 import { messages } from '@/shared/schema';
-import { eq, and, sql } from 'drizzle-orm';
-import { requireStaffPermission } from '@/lib/manager-permissions';
+import { and, inArray, sql } from 'drizzle-orm';
+import { parseClientIds, requireStaffPermissionForClients } from '@/lib/manager-permissions';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { userId } = body;
+    // A chat can combine several sender IDs (same person, different sessions)
+    const userIds = parseClientIds(body);
 
-    if (!userId) {
+    if (userIds.length === 0) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
     // Admins can delete any conversation; managers only their assigned clients'
-    const session = await requireStaffPermission('deleteMessages', userId);
+    const session = await requireStaffPermissionForClients('deleteMessages', userIds);
     if ('error' in session) {
       return NextResponse.json({ error: session.error }, { status: session.status });
     }
 
-    // Soft delete all messages for this user
+    // Soft delete all messages for these senders
     const now = new Date();
     await db
       .update(messages)
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
       })
       .where(
         and(
-          eq(messages.userId, userId),
+          inArray(messages.userId, userIds),
           sql`${messages.deletedAt} IS NULL`
         )
       );
