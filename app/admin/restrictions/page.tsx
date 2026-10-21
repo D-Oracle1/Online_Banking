@@ -92,7 +92,7 @@ export default function AdminRestrictionsPage() {
       </div>
 
       {/* Search */}
-      <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+      <div className="bg-white rounded-3xl shadow-sm p-6">
         <h2 className="text-lg font-semibold mb-4">Find User</h2>
         <div className="flex gap-3">
           <div className="flex-1">
@@ -102,13 +102,13 @@ export default function AdminRestrictionsPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="Search by name, email, or username"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900"
             />
           </div>
           <button
             onClick={handleSearch}
             disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold px-6 py-3 rounded-lg flex items-center gap-2"
+            className="bg-gray-900 hover:bg-gray-700 disabled:bg-gray-400 text-white font-semibold px-6 py-3 rounded-full flex items-center gap-2"
           >
             <Search className="w-5 h-5" />
             {loading ? 'Searching...' : 'Search'}
@@ -128,7 +128,7 @@ export default function AdminRestrictionsPage() {
                 </div>
                 <button
                   onClick={() => loadRestrictions(u)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold"
+                  className="bg-gray-900 hover:bg-gray-700 text-white px-4 py-2 rounded-full text-sm font-semibold"
                 >
                   Manage Restrictions
                 </button>
@@ -141,8 +141,8 @@ export default function AdminRestrictionsPage() {
       {/* Restriction management for selected user */}
       {selectedUser && (
         <>
-          <div className="bg-white rounded-xl shadow-md border border-gray-200">
-            <div className="bg-red-700 text-white p-5 rounded-t-xl flex items-center gap-3">
+          <div className="bg-white rounded-3xl shadow-sm">
+            <div className="bg-red-700 text-white p-5 rounded-t-3xl flex items-center gap-3">
               <ShieldAlert className="w-6 h-6" />
               <div>
                 <h2 className="text-lg font-bold">Restrictions for {selectedUser.fullName}</h2>
@@ -168,7 +168,7 @@ export default function AdminRestrictionsPage() {
                       onChange={(e) => setNewCode(e.target.value.toUpperCase())}
                       placeholder="e.g. RC-7823 or TAX-HOLD"
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg font-mono uppercase"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-xl font-mono uppercase"
                     />
                     <p className="text-xs text-gray-500 mt-1">This code is shown to the user after AML verification</p>
                   </div>
@@ -182,7 +182,7 @@ export default function AdminRestrictionsPage() {
                       onChange={(e) => setNewDescription(e.target.value)}
                       placeholder="e.g. Account under compliance review"
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-xl"
                     />
                     <p className="text-xs text-gray-500 mt-1">This message is displayed to the user</p>
                   </div>

@@ -89,7 +89,7 @@ export default function CodeGeneratorPage() {
       </div>
 
       {/* Search Section */}
-      <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+      <div className="bg-white rounded-3xl shadow-sm p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Search User</h2>
         <div className="flex gap-3">
           <div className="flex-1">
@@ -99,13 +99,13 @@ export default function CodeGeneratorPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="Enter user's full name, first name, or last name"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent"
             />
           </div>
           <button
             onClick={handleSearch}
             disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold px-6 py-3 rounded-lg transition duration-200 flex items-center gap-2"
+            className="bg-gray-900 hover:bg-gray-700 disabled:bg-gray-400 text-white font-semibold px-6 py-3 rounded-full transition duration-200 flex items-center gap-2"
           >
             <Search className="w-5 h-5" />
             {loading ? 'Searching...' : 'Search'}
@@ -140,13 +140,13 @@ export default function CodeGeneratorPage() {
 
       {/* Generated Codes Section */}
       {selectedUser && (
-        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+        <div className="bg-white rounded-3xl shadow-sm p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Generated Codes</h2>
-          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
-            <p className="text-blue-900 font-medium">
+          <div className="bg-gray-100 border-l-4 border-gray-900 p-4 mb-6 rounded-r-lg">
+            <p className="text-gray-900 font-medium">
               Codes generated for: <span className="font-bold">{selectedUser.fullName}</span>
             </p>
-            <p className="text-sm text-blue-700 mt-1">{selectedUser.email}</p>
+            <p className="text-sm text-gray-800 mt-1">{selectedUser.email}</p>
           </div>
 
           <div className="space-y-4">
@@ -154,12 +154,12 @@ export default function CodeGeneratorPage() {
             <div className="border border-gray-200 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-blue-600" />
+                  <Shield className="w-5 h-5 text-gray-900" />
                   <h3 className="font-semibold text-gray-900">AML Protection Code</h3>
                 </div>
                 <button
                   onClick={() => copyToClipboard(generatedCodes.aml, 'aml')}
-                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition"
+                  className="flex items-center gap-2 text-gray-900 hover:text-gray-600 transition"
                   disabled={loading}
                 >
                   {copiedField === 'aml' ? (
@@ -194,7 +194,7 @@ export default function CodeGeneratorPage() {
                 </div>
                 <button
                   onClick={() => copyToClipboard(generatedCodes.twoFA, 'twoFA')}
-                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition"
+                  className="flex items-center gap-2 text-gray-900 hover:text-gray-600 transition"
                   disabled={loading}
                 >
                   {copiedField === 'twoFA' ? (
@@ -224,12 +224,12 @@ export default function CodeGeneratorPage() {
             <div className="border border-gray-200 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <Unlock className="w-5 h-5 text-purple-600" />
+                  <Unlock className="w-5 h-5 text-gray-900" />
                   <h3 className="font-semibold text-gray-900">Account Unlock Code</h3>
                 </div>
                 <button
                   onClick={() => copyToClipboard(generatedCodes.unlock, 'unlock')}
-                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition"
+                  className="flex items-center gap-2 text-gray-900 hover:text-gray-600 transition"
                   disabled={loading}
                 >
                   {copiedField === 'unlock' ? (

@@ -134,12 +134,12 @@ export default function DeletedUsersClient({ users: initialUsers }: DeletedUsers
           placeholder="Search by name, email, username or account number..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent"
         />
       </div>
 
       {filteredUsers.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-md border border-gray-200 p-12 text-center">
+        <div className="bg-white rounded-3xl shadow-sm p-12 text-center">
           <UserX className="w-12 h-12 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500">
             {users.length === 0 ? 'No deleted users.' : 'No deleted users match your search.'}
@@ -150,7 +150,7 @@ export default function DeletedUsersClient({ users: initialUsers }: DeletedUsers
           {/* Mobile cards */}
           <div className="md:hidden space-y-3">
             {filteredUsers.map(user => (
-              <div key={user.id} className="bg-white rounded-xl shadow-md border border-gray-200 p-4 space-y-3">
+              <div key={user.id} className="bg-white rounded-3xl shadow-sm p-4 space-y-3">
                 <div className="min-w-0">
                   <p className="font-semibold text-gray-900 truncate">{user.fullName}</p>
                   <p className="text-sm text-gray-500 truncate">{user.email}</p>
@@ -171,7 +171,7 @@ export default function DeletedUsersClient({ users: initialUsers }: DeletedUsers
           </div>
 
           {/* Desktop table */}
-          <div className="hidden md:block bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+          <div className="hidden md:block bg-white rounded-3xl shadow-sm overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>

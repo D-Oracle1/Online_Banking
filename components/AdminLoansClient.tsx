@@ -118,17 +118,17 @@ export default function AdminLoansClient({ loans: initialLoans }: AdminLoansClie
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+        <div className="bg-white rounded-3xl shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total Applications</p>
               <p className="text-3xl font-bold text-gray-900">{loans.length}</p>
             </div>
-            <DollarSign className="w-12 h-12 text-blue-600" />
+            <DollarSign className="w-12 h-12 text-gray-900" />
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+        <div className="bg-white rounded-3xl shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Pending</p>
@@ -138,7 +138,7 @@ export default function AdminLoansClient({ loans: initialLoans }: AdminLoansClie
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+        <div className="bg-white rounded-3xl shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Approved</p>
@@ -148,19 +148,19 @@ export default function AdminLoansClient({ loans: initialLoans }: AdminLoansClie
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+        <div className="bg-white rounded-3xl shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total Disbursed</p>
-              <p className="text-2xl font-bold text-blue-600">{formatCurrency(totalLoanAmount)}</p>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalLoanAmount)}</p>
             </div>
-            <DollarSign className="w-12 h-12 text-blue-600" />
+            <DollarSign className="w-12 h-12 text-gray-900" />
           </div>
         </div>
       </div>
 
       {/* Filter Tabs */}
-      <div className="bg-white rounded-xl shadow-md p-4 border border-gray-200">
+      <div className="bg-white rounded-3xl shadow-sm p-4">
         <div className="flex space-x-2">
           {['ALL', 'PENDING', 'APPROVED', 'REJECTED'].map((status) => (
             <button
@@ -168,7 +168,7 @@ export default function AdminLoansClient({ loans: initialLoans }: AdminLoansClie
               onClick={() => setFilter(status as any)}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === status
-                  ? 'bg-blue-900 text-white'
+                  ? 'bg-gray-900 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -179,7 +179,7 @@ export default function AdminLoansClient({ loans: initialLoans }: AdminLoansClie
       </div>
 
       {/* Loans Table */}
-      <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -259,7 +259,7 @@ export default function AdminLoansClient({ loans: initialLoans }: AdminLoansClie
                       <div className="flex space-x-2">
                         <button
                           onClick={() => setSelectedLoan(loan)}
-                          className="text-blue-600 hover:text-blue-800"
+                          className="text-gray-900 hover:text-gray-600"
                           title="View Details"
                         >
                           <Eye className="w-5 h-5" />
@@ -297,8 +297,8 @@ export default function AdminLoansClient({ loans: initialLoans }: AdminLoansClie
       {/* Loan Details Modal */}
       {selectedLoan && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="bg-blue-900 text-white p-6 rounded-t-2xl flex items-center justify-between">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-gray-900 text-white p-6 rounded-t-3xl flex items-center justify-between">
               <h2 className="text-2xl font-bold">Loan Application Details</h2>
               <button
                 onClick={() => setSelectedLoan(null)}

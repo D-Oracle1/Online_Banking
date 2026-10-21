@@ -143,7 +143,7 @@ export default function DeletedMessagesClient({ messages: initialMessages, limit
           placeholder="Search by name, email or message text..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent"
         />
       </div>
 
@@ -154,7 +154,7 @@ export default function DeletedMessagesClient({ messages: initialMessages, limit
       )}
 
       {filteredGroups.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-md border border-gray-200 p-12 text-center">
+        <div className="bg-white rounded-3xl shadow-sm p-12 text-center">
           <MessageSquareDashed className="w-12 h-12 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500">
             {messages.length === 0 ? 'No deleted messages.' : 'No deleted messages match your search.'}
@@ -169,13 +169,13 @@ export default function DeletedMessagesClient({ messages: initialMessages, limit
             const count = group.messages.length;
 
             return (
-              <div key={group.key} className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+              <div key={group.key} className="bg-white rounded-3xl shadow-sm overflow-hidden">
                 <div className="p-4 flex flex-col md:flex-row md:items-center gap-3">
                   <button
                     onClick={() => setExpanded(isOpen ? null : group.key)}
                     className="flex-1 min-w-0 flex items-center gap-3 text-left"
                   >
-                    <div className="w-10 h-10 flex-shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold">
+                    <div className="w-10 h-10 flex-shrink-0 rounded-full bg-gradient-to-br from-gray-700 to-gray-700 flex items-center justify-center text-white font-bold">
                       {group.userName.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">

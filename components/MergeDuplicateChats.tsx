@@ -62,7 +62,7 @@ export default function MergeDuplicateChats({ compact = false }: { compact?: boo
         // Icon button for the blue chat header
         <button
           onClick={openPreview}
-          className="p-1.5 rounded-lg bg-blue-800 hover:bg-blue-700 transition-colors"
+          className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
           title="Merge duplicate chats"
           aria-label="Merge duplicate chats"
         >
@@ -71,7 +71,7 @@ export default function MergeDuplicateChats({ compact = false }: { compact?: boo
       ) : (
         <button
           onClick={openPreview}
-          className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
         >
           <Combine className="w-4 h-4" />
           Merge duplicate chats
@@ -91,7 +91,7 @@ export default function MergeDuplicateChats({ compact = false }: { compact?: boo
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 text-sm">
               {loading && (
                 <div className="flex items-center gap-2 text-gray-500 py-6 justify-center">
-                  <span className="w-5 h-5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin" />
+                  <span className="w-5 h-5 rounded-full border-2 border-gray-900 border-t-transparent animate-spin" />
                   Looking for people with split chats…
                 </div>
               )}
@@ -163,7 +163,7 @@ export default function MergeDuplicateChats({ compact = false }: { compact?: boo
                 <button
                   onClick={runMerge}
                   disabled={merging}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 rounded-lg disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-gray-900 text-white hover:bg-gray-700 rounded-full disabled:opacity-50"
                 >
                   {merging && <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />}
                   {merging ? 'Merging…' : `Merge ${plan.groups.length} ${plan.groups.length === 1 ? 'person' : 'people'}`}
