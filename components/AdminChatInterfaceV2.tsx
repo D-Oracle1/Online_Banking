@@ -332,7 +332,7 @@ export default function AdminChatInterfaceV2({ conversations: initialConversatio
   const handleDeleteConversation = async () => {
     if (!selectedUser) return;
 
-    if (!confirm(`Are you sure you want to delete the entire conversation with ${selectedUser.fullName}? This action cannot be undone.`)) {
+    if (!confirm(`Are you sure you want to delete the entire conversation with ${selectedUser.fullName}? An admin can restore it from Deleted Messages.`)) {
       return;
     }
 

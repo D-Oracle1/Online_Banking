@@ -2,44 +2,45 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminAuth } from '@/lib/session';
 import { db } from '@/server/db';
 import { messages } from '@/shared/schema';
-import { eq } from 'drizzle-orm';
-import { logRestore } from '@/server/audit-logger';
+import { and, eq, inArray, isNotNull } from 'drizzle-orm';
+import { logRestore, logBulkRestore } from '@/server/audit-logger';
 
+/**
+ * Restore soft-deleted messages.
+ * Body: { messageId } for one message, { messageIds } for several,
+ * or { userId } for every deleted message in that conversation.
+ */
 export async function POST(request: NextRequest) {
   try {
     const session = await requireAdminAuth();
 
-    const { messageId } = await request.json();
+    const { messageId, messageIds, userId } = await request.json();
 
-    if (!messageId) {
-      return NextResponse.json({ error: 'Message ID is required' }, { status: 400 });
+    const ids: string[] = messageIds ?? (messageId ? [messageId] : []);
+
+    if (!ids.length && !userId) {
+      return NextResponse.json({ error: 'Message ID or user ID is required' }, { status: 400 });
     }
 
-    // Check if message exists
-    const message = await db.query.messages.findFirst({
-      where: eq(messages.id, messageId),
-    });
-
-    if (!message) {
-      return NextResponse.json({ error: 'Message not found' }, { status: 404 });
-    }
-
-    if (!message.deletedAt) {
-      return NextResponse.json({ error: 'Message is not deleted' }, { status: 400 });
-    }
-
-    // Restore the message
-    await db.update(messages)
+    const restored = await db.update(messages)
       .set({ deletedAt: null, deletedBy: null })
-      .where(eq(messages.id, messageId));
+      .where(and(
+        isNotNull(messages.deletedAt),
+        userId ? eq(messages.userId, userId) : inArray(messages.id, ids)
+      ))
+      .returning({ id: messages.id });
 
     // Log the restoration for audit trail
-    const adminId = session.id;
-    await logRestore(adminId, 'message', messageId, request as any);
+    if (restored.length === 1) {
+      await logRestore(session.id, 'message', restored[0].id, request as any);
+    } else if (restored.length > 1) {
+      await logBulkRestore(session.id, 'message', restored.map(r => r.id), request as any);
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Message restored successfully'
+      restoredCount: restored.length,
+      message: `${restored.length} message${restored.length === 1 ? '' : 's'} restored successfully`,
     });
   } catch (error) {
     console.error('Restore message error:', error);

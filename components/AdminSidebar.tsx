@@ -6,7 +6,7 @@ import NavigationLink from '@/components/NavigationLink';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Users, DollarSign, ArrowLeftRight,
-  MessageSquare, FileText, Settings, Shield, CreditCard, Menu, X, UserCheck, Mail, Key, Crown, ChevronLeft, ChevronRight, ShieldAlert, UserCog, UserX
+  MessageSquare, FileText, Settings, Shield, CreditCard, Menu, X, UserCheck, Mail, Key, Crown, ChevronLeft, ChevronRight, ShieldAlert, UserCog, UserX, MessageSquareDashed
 } from 'lucide-react';
 
 const menuItems = [
@@ -20,6 +20,7 @@ const menuItems = [
   { icon: DollarSign, label: 'Deposits Approval', href: '/admin/deposits', badgeKey: 'pendingDeposits' },
   { icon: ArrowLeftRight, label: 'Transactions', href: '/admin/transactions' },
   { icon: MessageSquare, label: 'User Messages', href: '/admin/messages', badgeKey: 'unreadMessages' },
+  { icon: MessageSquareDashed, label: 'Deleted Messages', href: '/admin/deleted-messages' },
   { icon: FileText, label: 'Loan Applications', href: '/admin/loans', badgeKey: 'pendingLoans' },
   { icon: CreditCard, label: 'Loan Repayments', href: '/admin/loan-repayments' },
   { icon: Mail, label: 'Bulk Email', href: '/admin/bulk-email' },

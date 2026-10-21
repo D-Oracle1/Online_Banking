@@ -12,19 +12,22 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     where: eq(messages.id, id),
   });
 
-  if (!message || message.deletedAt || !message.attachment) {
+  if (!message || !message.attachment) {
     return new Response('Not found', { status: 404 });
   }
 
+  // Deleted messages' images are only visible to staff (for the Deleted Messages screen)
+  const isDeleted = !!message.deletedAt;
+
   // Guests are identified by the guest ID they already use to read their chat
   const guestId = request.nextUrl.searchParams.get('g');
-  let allowed = !!guestId && guestId === message.userId;
+  let allowed = !isDeleted && !!guestId && guestId === message.userId;
 
   if (!allowed) {
     const cookieStore = await cookies();
     const viewerId = cookieStore.get('userId')?.value;
     if (viewerId) {
-      if (viewerId === message.userId) {
+      if (!isDeleted && viewerId === message.userId) {
         allowed = true;
       } else {
         const viewer = await db.query.users.findFirst({ where: eq(users.id, viewerId) });
@@ -37,6 +40,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return new Response('Forbidden', { status: 403 });
   }
 
-  // Message attachments never change, so the browser can keep them
-  return imageResponse(message.attachment, 'private, max-age=31536000, immutable');
+  // Message attachments never change, so the browser can keep them.
+  // Deleted ones aren't cached long, so permanently deleting them takes effect.
+  return imageResponse(message.attachment, isDeleted ? 'private, no-store' : 'private, max-age=31536000, immutable');
 }
