@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useLoading } from '@/contexts/LoadingContext';
 import LoadingLogo, { preloadLoadingLogo } from '@/components/LoadingLogo';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 // Don't flash the overlay for navigations that finish almost instantly
 const SHOW_DELAY_MS = 150;
@@ -14,11 +15,13 @@ export default function GlobalLoadingIndicator() {
   const { isLoading, loadingMessage, startLoading, stopLoading } = useLoading();
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
+  const { settings } = useSiteSettings();
 
   // Warm up the logo so the first loader shows it straight away
   useEffect(() => {
     preloadLoadingLogo();
-  }, []);
+    if (settings.faviconUrl) preloadLoadingLogo(settings.faviconUrl);
+  }, [settings.faviconUrl]);
 
   // Navigation finished
   useEffect(() => {

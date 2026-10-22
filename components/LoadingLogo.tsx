@@ -1,6 +1,7 @@
 'use client';
 
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import BrandImage from '@/components/BrandImage';
 
 // Square bank-building mark from the brand assets; the wide wordmark doesn't fit the ring
 const DEFAULT_LOGO = '/assets/images/brand/favicon.png';
@@ -39,13 +40,17 @@ export default function LoadingLogo({ message, size = 72 }: { message?: string; 
         />
         {/* Pulsing logo in the middle */}
         <div className="absolute inset-[10px] rounded-full bg-white flex items-center justify-center overflow-hidden shadow-inner animate-pulse">
-          {logo ? (
-            <img src={logo} alt="" className="w-full h-full object-contain" />
-          ) : (
-            <span className="font-bold text-xl" style={{ color }}>
-              {(branding.bankName || 'B').charAt(0).toUpperCase()}
-            </span>
-          )}
+          {/* Uploaded favicon first; if its URL is dead, the built-in mark, then the initial */}
+          <BrandImage
+            sources={[logo, DEFAULT_LOGO]}
+            alt=""
+            className="w-full h-full object-contain"
+            fallback={
+              <span className="font-bold text-xl" style={{ color }}>
+                {(branding.bankName || 'B').charAt(0).toUpperCase()}
+              </span>
+            }
+          />
         </div>
       </div>
 

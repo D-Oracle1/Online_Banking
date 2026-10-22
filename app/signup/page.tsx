@@ -3,7 +3,7 @@ import { getSession } from '@/lib/session';
 import { getSiteSettings } from '@/lib/site-settings';
 import EnhancedSignupForm from '@/components/EnhancedSignupForm';
 import SupportChatbot from '@/components/SupportChatbot';
-import Image from 'next/image';
+import BrandImage from '@/components/BrandImage';
 import Link from 'next/link';
 
 export default async function SignupPage() {
@@ -28,22 +28,13 @@ export default async function SignupPage() {
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              {settings.logoUrl ? (
-                <img
-                  src={settings.logoUrl}
-                  alt={`${settings.bankName} Logo`}
-                  className="h-20 object-contain"
-                />
-              ) : (
-                <Image
-                  src="/logo_1760007385.png"
-                  alt={`${settings.bankName} Logo`}
-                  width={200}
-                  height={80}
-                  priority
-                  className="object-contain"
-                />
-              )}
+              {/* Uploaded logo first; if its URL is dead, the built-in logo */}
+              <BrandImage
+                sources={[settings.logoUrl, '/logo_1760007385.png']}
+                alt={`${settings.bankName} Logo`}
+                className="h-20 object-contain"
+                fallback={<span className="text-2xl font-bold text-gray-900">{settings.bankName}</span>}
+              />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Your Account</h1>
             <p className="text-gray-600">Join {settings.bankName} - {settings.tagline || 'Your trusted financial partner'}</p>

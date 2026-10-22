@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import BrandImage from '@/components/BrandImage';
 
 interface SplashScreenClientProps {
   splashLogoUrl?: string | null;
@@ -38,22 +38,13 @@ export default function SplashScreenClient({
       <div className="flex flex-col items-center animate-fade-in">
         {/* Logo - simple and centered */}
         <div className="mb-12">
-          {logoSrc ? (
-            <img
-              src={logoSrc}
-              alt={bankName}
-              className="h-28 object-contain"
-            />
-          ) : (
-            <Image
-              src="/logo_1760007385.png"
-              alt={bankName}
-              width={280}
-              height={112}
-              priority
-              className="object-contain"
-            />
-          )}
+          {/* Uploaded splash/main logo first; if its URL is dead, the built-in logo */}
+          <BrandImage
+            sources={[logoSrc, '/logo_1760007385.png']}
+            alt={bankName}
+            className="h-28 object-contain"
+            fallback={<span className="text-3xl font-bold text-gray-900">{bankName}</span>}
+          />
         </div>
 
         {/* Minimal loading indicator - just a simple spinner */}

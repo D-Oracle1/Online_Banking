@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import NavigationLink from '@/components/NavigationLink';
 import { usePathname } from 'next/navigation';
+import BrandImage from '@/components/BrandImage';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
-import Image from 'next/image';
 import {
   Home, BarChart3, FileText, DollarSign, History,
   FileBarChart, Send, Clock, CreditCard, Landmark, MessageCircle, Menu, X, User, Shield, ChevronLeft, ChevronRight
@@ -170,21 +170,13 @@ export default function Sidebar() {
         <div className="flex items-center justify-between">
           <div className={`flex items-center ${collapsed ? 'justify-center w-full' : 'space-x-3'}`}>
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center p-1 flex-shrink-0">
-              {(settings.logoUrl || settings.faviconUrl) ? (
-                <img
-                  src={settings.logoUrl || settings.faviconUrl || ''}
-                  alt={settings.bankName}
-                  className="w-8 h-8 object-contain"
-                />
-              ) : (
-                <Image
-                  src="/favicon.png"
-                  alt={settings.bankName}
-                  width={32}
-                  height={32}
-                  className="object-contain"
-                />
-              )}
+              {/* Uploaded logo first; if its URL is dead, the built-in mark, then the initial */}
+              <BrandImage
+                sources={[settings.logoUrl, settings.faviconUrl, '/favicon.png']}
+                alt={settings.bankName}
+                className="w-8 h-8 object-contain"
+                fallback={<span className="font-bold text-lg" style={{ color: settings.primaryColor }}>{settings.bankName.charAt(0).toUpperCase()}</span>}
+              />
             </div>
             {!collapsed && (
               <div>

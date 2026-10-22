@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import AdminNotificationBadge from '@/components/AdminNotificationBadge';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import BrandImage from '@/components/BrandImage';
 
 type BadgeKey = 'pendingDeposits' | 'unreadMessages' | 'pendingLoans';
 
@@ -131,7 +132,17 @@ export default function AdminSidebar({ isSuperAdmin = false }: AdminSidebarProps
       <div className={`pt-6 pb-4 ${collapsed ? 'px-3' : 'px-6'}`}>
         <div className="flex items-center justify-between">
           <div className={`flex items-center ${collapsed ? 'justify-center w-full' : 'gap-3'} min-w-0`}>
-            <img src={logo} alt="" className="w-9 h-9 object-contain flex-shrink-0" />
+            {/* Uploaded favicon first; if its URL is dead, the built-in mark, then the initial */}
+            <BrandImage
+              sources={[logo, DEFAULT_LOGO]}
+              alt=""
+              className="w-9 h-9 object-contain flex-shrink-0"
+              fallback={
+                <span className="w-9 h-9 rounded-xl bg-brand text-white font-bold flex items-center justify-center flex-shrink-0">
+                  {(bankName || 'B').charAt(0).toUpperCase()}
+                </span>
+              }
+            />
             {!collapsed && (
               <div className="min-w-0">
                 <p className="font-bold text-lg leading-tight text-gray-900 truncate">{bankName}</p>
