@@ -1,39 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
-interface Branding {
-  bankName: string;
-  primaryColor: string;
-  logo: string | null;
-}
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 // Square bank-building mark from the brand assets; the wide wordmark doesn't fit the ring
 const DEFAULT_LOGO = '/assets/images/brand/favicon.png';
 
-const defaultBranding: Branding = { bankName: 'Sterling Capital Bank', primaryColor: '#1e3a8a', logo: DEFAULT_LOGO };
-
-// Fetched once per page session so loaders don't each refetch and pop the logo in late
-let cachedBranding: Branding | null = null;
-let brandingRequest: Promise<Branding> | null = null;
-
-export function preloadLoadingLogo() {
-  return loadBranding();
-}
-
-function loadBranding() {
-  brandingRequest ??= fetch('/api/site-settings')
-    .then(res => (res.ok ? res.json() : {}))
-    .then((data: any) => {
-      cachedBranding = {
-        bankName: data.bankName || defaultBranding.bankName,
-        primaryColor: data.primaryColor || defaultBranding.primaryColor,
-        logo: data.faviconUrl || DEFAULT_LOGO,
-      };
-      return cachedBranding;
-    })
-    .catch(() => defaultBranding);
-  return brandingRequest;
+/** Warm the browser cache so the first loader shows its logo straight away */
+export function preloadLoadingLogo(src: string = DEFAULT_LOGO) {
+  if (typeof window === 'undefined') return;
+  const img = new Image();
+  img.src = src;
 }
 
 /**
@@ -41,14 +17,13 @@ function loadBranding() {
  * (or its initial when no logo is set), with bouncing dots underneath.
  */
 export default function LoadingLogo({ message, size = 72 }: { message?: string; size?: number }) {
-  const [branding, setBranding] = useState<Branding>(cachedBranding || defaultBranding);
-
-  useEffect(() => {
-    if (cachedBranding) return;
-    let active = true;
-    loadBranding().then(b => { if (active) setBranding(b); });
-    return () => { active = false; };
-  }, []);
+  // Branding comes from the shared site settings (seeded on the server)
+  const { settings } = useSiteSettings();
+  const branding = {
+    bankName: settings.bankName,
+    primaryColor: settings.primaryColor || '#1e3a8a',
+    logo: settings.faviconUrl || DEFAULT_LOGO,
+  };
 
   const color = branding.primaryColor;
   const logo = branding.logo;

@@ -10,8 +10,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title: `${settings.bankName} - Online Banking`,
     description: "Manage your funds, apply for loans, and track your financial growth with ease.",
     icons: {
-      icon: settings.faviconUrl || '/favicon.ico',
-      apple: '/apple-touch-icon.png',
+      icon: settings.faviconUrl || '/favicon.ico?v=2',
+      apple: settings.appIconUrl || '/apple-touch-icon.png?v=2',
     },
     manifest: '/api/manifest',
     appleWebApp: {
@@ -49,6 +49,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const settings = await getSiteSettings();
+  // Public branding only (same fields /api/site-settings returns), without audit columns
+  const { updatedAt, updatedBy, ...publicSettings } = settings as typeof settings & { updatedAt?: unknown; updatedBy?: unknown };
 
   return (
     <html lang="en">
@@ -89,7 +91,7 @@ export default async function RootLayout({
         }} />
       </head>
       <body>
-        <Providers>{children}</Providers>
+        <Providers initialSettings={publicSettings as any}>{children}</Providers>
       </body>
     </html>
   );

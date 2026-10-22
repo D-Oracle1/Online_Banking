@@ -50,7 +50,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
               </svg>
             </div>
-            <h3 class="chatbot-name-title">Welcome to Sterling Capital Bank Support</h3>
+            <h3 class="chatbot-name-title">Welcome to <span class="chatbot-bank-name">our</span> Support</h3>
             <p class="chatbot-name-description">Please tell us your name to continue chatting with our support team.</p>
             <input type="text" id="chatbot-name-input" class="chatbot-name-input" placeholder="Enter your name..." maxlength="50">
             <button type="button" id="chatbot-name-submit" class="chatbot-name-submit">Start Chat</button>
@@ -789,8 +789,24 @@
       this.guestName = null;
       this.guestId = null;
       this.pollingInterval = null;
+      this.bankName = null;
 
       this.init();
+      this.loadBankName();
+    }
+
+    // Bank name comes from the admin's site settings
+    async loadBankName() {
+      try {
+        const response = await fetch('/api/site-settings');
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!data.bankName) return;
+        this.bankName = data.bankName;
+        document.querySelectorAll('.chatbot-bank-name').forEach(el => { el.textContent = data.bankName; });
+      } catch (error) {
+        // Keep the neutral wording if settings can't be loaded
+      }
     }
 
     init() {
@@ -910,7 +926,7 @@
     addWelcomeMessage() {
       const welcomeMsg = {
         id: Date.now().toString(),
-        text: `Hello ${this.guestName}! Welcome to Sterling Capital Bank Support. Our team is ready to assist you. How can we help you today?`,
+        text: `Hello ${this.guestName}! Welcome to ${this.bankName || 'our'} Support. Our team is ready to assist you. How can we help you today?`,
         sender: 'admin',
         timestamp: new Date().toISOString()
       };

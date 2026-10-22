@@ -24,18 +24,18 @@ export default function AdminSettingsClient() {
     },
     bank: {
       enabled: true,
-      accountName: 'Sterling Capital Bank',
+      accountName: '',
       accountNumber: '1234567890',
       routingNumber: '021000021',
       swiftCode: 'STERBUS33',
     },
     cashapp: {
       enabled: true,
-      handle: '$SterlingCapital',
+      handle: '',
     },
     paypal: {
       enabled: true,
-      email: 'payments@sterlingcapitalbank.com',
+      email: '',
     },
   });
 
@@ -53,8 +53,8 @@ export default function AdminSettingsClient() {
     smtpPort: '587',
     smtpUser: '',
     smtpPassword: '',
-    fromEmail: 'noreply@sterlingcapitalbank.com',
-    fromName: 'Sterling Capital Bank',
+    fromEmail: '',
+    fromName: '',
   });
 
   // Load settings on component mount

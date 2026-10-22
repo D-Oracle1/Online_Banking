@@ -791,7 +791,7 @@ export default function SuperAdminClient({ initialUsers, initialSettings }: Supe
                         value={settings.copyrightText || ''}
                         onChange={(e) => setSettings({ ...settings, copyrightText: e.target.value })}
                         className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg"
-                        placeholder="e.g., 2025 Sterling Capital Bank. All rights reserved."
+                        placeholder="e.g., 2025 Your Bank. All rights reserved."
                       />
                     </div>
                   </div>

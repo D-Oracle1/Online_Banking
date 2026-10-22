@@ -14,7 +14,7 @@ interface SplashScreenClientProps {
 export default function SplashScreenClient({
   splashLogoUrl,
   logoUrl,
-  bankName = 'Sterling Capital Bank',
+  bankName = 'Online Banking',
   primaryColor = '#1e3a8a'
 }: SplashScreenClientProps) {
   const router = useRouter();

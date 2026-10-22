@@ -37,7 +37,7 @@ export default async function SuperAdminPage() {
     borderColor: '#e5e7eb',
     shadowColor: '#000000',
     // Site Information
-    bankName: 'Sterling Capital Bank',
+    bankName: 'Online Banking',
     tagline: null,
     supportEmail: null,
     supportPhone: null,

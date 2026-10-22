@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Download, Smartphone, Share } from 'lucide-react';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -19,9 +20,11 @@ export default function PWAInstallPrompt() {
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  // Start from the server-provided branding so the prompt names the right bank
+  const { settings: site } = useSiteSettings();
   const [settings, setSettings] = useState<SiteSettings>({
-    bankName: 'Sterling Bank',
-    primaryColor: '#4f46e5'
+    bankName: site.bankName,
+    primaryColor: site.primaryColor,
   });
 
   // Fetch site settings
@@ -32,8 +35,8 @@ export default function PWAInstallPrompt() {
         if (response.ok) {
           const data = await response.json();
           setSettings({
-            bankName: data.bankName || 'Sterling Bank',
-            primaryColor: data.primaryColor || '#4f46e5'
+            bankName: data.bankName || site.bankName,
+            primaryColor: data.primaryColor || site.primaryColor
           });
         }
       } catch (error) {

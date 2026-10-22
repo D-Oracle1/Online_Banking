@@ -9,6 +9,7 @@ import {
   ShieldAlert, UserCog, UserX, MessageSquareDashed, SlidersHorizontal, LogOut, ArrowLeft,
 } from 'lucide-react';
 import AdminNotificationBadge from '@/components/AdminNotificationBadge';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 type BadgeKey = 'pendingDeposits' | 'unreadMessages' | 'pendingLoans';
 
@@ -72,8 +73,10 @@ export default function AdminSidebar({ isSuperAdmin = false }: AdminSidebarProps
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [bankName, setBankName] = useState('Sterling Capital Bank');
-  const [logo, setLogo] = useState(DEFAULT_LOGO);
+  // Start from the server-provided branding so the right name/logo show immediately
+  const { settings: site } = useSiteSettings();
+  const [bankName, setBankName] = useState(site.bankName);
+  const [logo, setLogo] = useState(site.faviconUrl || DEFAULT_LOGO);
   const [notificationCounts, setNotificationCounts] = useState<Record<BadgeKey, number>>({
     pendingDeposits: 0,
     unreadMessages: 0,

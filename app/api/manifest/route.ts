@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getSiteSettings } from '@/lib/site-settings';
 
+// Bump when the built-in icons change: /*.png is cached for a year as immutable
+const ICON_VERSION = 'v=2';
+
 export async function GET() {
   const settings = await getSiteSettings();
 
@@ -17,61 +20,61 @@ export async function GET() {
     orientation: 'portrait-primary',
     icons: [
       {
-        src: settings.appIconUrl || '/icon-72.png',
+        src: settings.appIconUrl || `/icon-72.png?${ICON_VERSION}`,
         sizes: '72x72',
         type: 'image/png',
         purpose: 'any'
       },
       {
-        src: settings.appIconUrl || '/icon-96.png',
+        src: settings.appIconUrl || `/icon-96.png?${ICON_VERSION}`,
         sizes: '96x96',
         type: 'image/png',
         purpose: 'any'
       },
       {
-        src: settings.appIconUrl || '/icon-128.png',
+        src: settings.appIconUrl || `/icon-128.png?${ICON_VERSION}`,
         sizes: '128x128',
         type: 'image/png',
         purpose: 'any'
       },
       {
-        src: settings.appIconUrl || '/icon-144.png',
+        src: settings.appIconUrl || `/icon-144.png?${ICON_VERSION}`,
         sizes: '144x144',
         type: 'image/png',
         purpose: 'any'
       },
       {
-        src: settings.appIconUrl || '/icon-152.png',
+        src: settings.appIconUrl || `/icon-152.png?${ICON_VERSION}`,
         sizes: '152x152',
         type: 'image/png',
         purpose: 'any'
       },
       {
-        src: settings.appIconUrl || '/icon-192.png',
+        src: settings.appIconUrl || `/icon-192.png?${ICON_VERSION}`,
         sizes: '192x192',
         type: 'image/png',
         purpose: 'any'
       },
       {
-        src: settings.appIconUrl || '/icon-384.png',
+        src: settings.appIconUrl || `/icon-384.png?${ICON_VERSION}`,
         sizes: '384x384',
         type: 'image/png',
         purpose: 'any'
       },
       {
-        src: settings.appIconUrl || '/icon-512.png',
+        src: settings.appIconUrl || `/icon-512.png?${ICON_VERSION}`,
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any'
       },
       {
-        src: settings.appIconUrl || '/icon-192.png',
+        src: settings.appIconUrl || `/icon-192.png?${ICON_VERSION}`,
         sizes: '192x192',
         type: 'image/png',
         purpose: 'maskable'
       },
       {
-        src: settings.appIconUrl || '/icon-512.png',
+        src: settings.appIconUrl || `/icon-512.png?${ICON_VERSION}`,
         sizes: '512x512',
         type: 'image/png',
         purpose: 'maskable'
@@ -85,14 +88,14 @@ export async function GET() {
         short_name: 'Dashboard',
         description: 'View your account dashboard',
         url: '/dashboard',
-        icons: [{ src: settings.appIconUrl || '/icon-192.png', sizes: '192x192' }]
+        icons: [{ src: settings.appIconUrl || `/icon-192.png?${ICON_VERSION}`, sizes: '192x192' }]
       },
       {
         name: 'Transfers',
         short_name: 'Transfer',
         description: 'Make a transfer',
         url: '/dashboard/transfer',
-        icons: [{ src: settings.appIconUrl || '/icon-192.png', sizes: '192x192' }]
+        icons: [{ src: settings.appIconUrl || `/icon-192.png?${ICON_VERSION}`, sizes: '192x192' }]
       }
     ],
     scope: '/',

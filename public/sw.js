@@ -1,9 +1,9 @@
 // Service Worker for Push Notifications and PWA
-const CACHE_NAME = 'sterlingbank-v4';
+const CACHE_NAME = 'bank-v5';
 const STATIC_ASSETS = [
-  '/icon-192.png',
-  '/icon-512.png',
-  '/manifest.json',
+  '/icon-192.png?v=2',
+  '/icon-512.png?v=2',
+  '/api/manifest',
 ];
 
 self.addEventListener('install', (event) => {
@@ -44,8 +44,8 @@ self.addEventListener('push', (event) => {
 
     const options = {
       body: body || 'You have a new notification',
-      icon: icon || '/icon-192.png',
-      badge: badge || '/icon-96.png',
+      icon: icon || '/icon-192.png?v=2',
+      badge: badge || '/icon-96.png?v=2',
       tag: payload?.tag || 'notification',
       data: payload || {},
       requireInteraction: false,

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import NavigationLink from '@/components/NavigationLink';
 import { usePathname } from 'next/navigation';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 import Image from 'next/image';
 import {
   Home, BarChart3, FileText, DollarSign, History,
@@ -52,11 +53,13 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  // Start from the server-provided branding so the right name/logo show immediately
+  const { settings: site } = useSiteSettings();
   const [settings, setSettings] = useState<SiteSettings>({
-    bankName: 'Sterling Capital Bank',
-    logoUrl: null,
-    faviconUrl: null,
-    primaryColor: '#1e3a8a',
+    bankName: site.bankName,
+    logoUrl: site.logoUrl,
+    faviconUrl: site.faviconUrl,
+    primaryColor: site.primaryColor,
   });
 
   // Update settings from theme changes
@@ -71,7 +74,7 @@ export default function Sidebar() {
       if (response.ok) {
         const data = await response.json();
         setSettings({
-          bankName: data.bankName || 'Sterling Capital Bank',
+          bankName: data.bankName || site.bankName,
           logoUrl: data.logoUrl || null,
           faviconUrl: data.faviconUrl || null,
           primaryColor: data.primaryColor || '#1e3a8a',

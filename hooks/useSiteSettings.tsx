@@ -62,7 +62,7 @@ const defaultSettings: SiteSettings = {
   buttonDanger: '#ef4444',
   borderColor: '#e5e7eb',
   shadowColor: '#000000',
-  bankName: 'Sterling Capital Bank',
+  bankName: 'Online Banking',
   tagline: null,
   supportEmail: null,
   supportPhone: null,
@@ -202,10 +202,10 @@ export function SiteSettingsProvider({
   }, []);
 
   useEffect(() => {
-    if (!initialSettings) {
-      fetchSettings();
-    }
-  }, [initialSettings, fetchSettings]);
+    // Always refresh once: server-provided settings may come from a page
+    // pre-rendered at build time, before the admin changed them
+    fetchSettings();
+  }, [fetchSettings]);
 
   // Listen for theme changes from other tabs/windows
   useEffect(() => {

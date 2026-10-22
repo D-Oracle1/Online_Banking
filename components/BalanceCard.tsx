@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Eye, EyeOff, RefreshCw, DollarSign, Send, Lock, CreditCard } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -18,8 +19,10 @@ interface BalanceCardProps {
 export default function BalanceCard({ balance, accountNumber, accountType }: BalanceCardProps) {
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [primaryColor, setPrimaryColor] = useState('#1e3a8a');
-  const [bankName, setBankName] = useState('Sterling Capital Bank');
+  // Start from the server-provided branding so the right bank name shows immediately
+  const { settings: site } = useSiteSettings();
+  const [primaryColor, setPrimaryColor] = useState(site.primaryColor);
+  const [bankName, setBankName] = useState(site.bankName);
   const router = useRouter();
 
   // Fetch site settings
@@ -29,7 +32,7 @@ export default function BalanceCard({ balance, accountNumber, accountType }: Bal
       if (response.ok) {
         const data = await response.json();
         setPrimaryColor(data.primaryColor || '#1e3a8a');
-        setBankName(data.bankName || 'Sterling Capital Bank');
+        setBankName(data.bankName || site.bankName);
       }
     } catch (error) {
       console.error('Error fetching site settings:', error);

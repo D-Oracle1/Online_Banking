@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/server/db';
 import { platformSettings } from '@/shared/schema';
 import { eq } from 'drizzle-orm';
+import { getBankName } from '@/lib/site-settings';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +26,7 @@ export async function GET(request: NextRequest) {
 
     // Default payment methods if none configured
     if (!paymentMethods) {
+      const bankName = await getBankName();
       paymentMethods = {
         btc: {
           enabled: true,
@@ -47,23 +49,23 @@ export async function GET(request: NextRequest) {
         },
         bank: {
           enabled: true,
-          accountName: 'Sterling Capital Bank',
+          accountName: bankName,
           accountNumber: '1234567890',
-          bankName: 'Sterling Capital Bank',
+          bankName,
           routingNumber: '021000021',
           swiftCode: 'STERBUS33',
           name: 'Bank Transfer',
           icon: '🏦'
         },
         cashapp: {
-          enabled: true,
-          handle: '$SterlingCapital',
+          enabled: false,
+          handle: '',
           name: 'Cash App',
           icon: '$'
         },
         paypal: {
-          enabled: true,
-          email: 'payments@sterlingcapitalbank.com',
+          enabled: false,
+          email: '',
           name: 'PayPal',
           icon: 'P'
         }
